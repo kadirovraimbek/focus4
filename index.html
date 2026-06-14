@@ -6,1064 +6,1369 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0D0D0F">
-<title>Focus4 — система Тимошко</title>
+<title>Focus4</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0D0D0F;--surface:#1A1A1F;--surface2:#242429;
+  --accent:#FF6B35;--adim:rgba(255,107,53,.13);
+  --text:#fff;--t2:#9999A8;--t3:#555560;
+  --border:rgba(255,255,255,.07);
+  --green:#34D399;--blue:#60A5FA;--purple:#A78BFA;--amber:#FBBF24;--red:#FF6B6B;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,sans-serif;overflow:hidden}
+.app{height:100dvh;display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative}
 
-  :root {
-    --bg: #0D0D0F;
-    --surface: #1A1A1F;
-    --surface2: #242429;
-    --accent: #FF6B35;
-    --accent-dim: rgba(255,107,53,0.15);
-    --text: #FFFFFF;
-    --text2: #9999A8;
-    --text3: #555560;
-    --border: rgba(255,255,255,0.07);
-    --green: #34D399;
-    --blue: #60A5FA;
-    --purple: #A78BFA;
-  }
+/* SCREENS */
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+.scroll{flex:1;overflow-y:auto;padding:0 16px 110px;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
 
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, 'Inter', system-ui, sans-serif;
-    overflow: hidden;
-  }
+/* HEADER */
+.hdr{padding:14px 16px 10px;padding-top:calc(14px + env(safe-area-inset-top));flex-shrink:0}
+.hdr-row{display:flex;justify-content:space-between;align-items:flex-start}
+.htitle{font-size:22px;font-weight:700}
+.hsub{font-size:13px;color:var(--t2);margin-top:3px}
 
-  /* APP SHELL */
-  .app {
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    max-width: 430px;
-    margin: 0 auto;
-    position: relative;
-  }
+/* NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
+  background:rgba(13,13,15,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);display:flex;padding:8px 0 calc(8px + env(safe-area-inset-bottom));z-index:100}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;
+  color:var(--t3);font-size:10px;font-weight:500;cursor:pointer;padding:6px 0;transition:color .2s}
+.nb.on{color:var(--accent)}
+.nb svg{width:22px;height:22px}
 
-  /* SCREENS */
-  .screen {
-    display: none;
-    flex: 1;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .screen.active { display: flex; }
+/* CARDS */
+.card{background:var(--surface);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid var(--border)}
+.ctitle{font-size:12px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px}
 
-  /* SCROLLABLE CONTENT */
-  .scroll-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 20px 100px;
-    -webkit-overflow-scrolling: touch;
-  }
-  .scroll-area::-webkit-scrollbar { display: none; }
+/* STATS */
+.srow{display:flex;gap:10px;margin-bottom:12px}
+.schip{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 10px;text-align:center}
+.snum{font-size:28px;font-weight:800;color:var(--accent)}
+.slbl{font-size:11px;color:var(--t2);margin-top:2px;font-weight:500}
 
-  /* BOTTOM NAV */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 430px;
-    background: rgba(13,13,15,0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    display: flex;
-    padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
-    z-index: 100;
-  }
+/* PROGRESS */
+.pwrap{height:3px;background:var(--surface2);border-radius:2px;margin:4px 0 6px;overflow:hidden}
+.pfill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease}
+.plbl{font-size:12px;color:var(--t2);margin-bottom:14px}
 
-  .nav-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    background: none;
-    border: none;
-    color: var(--text3);
-    font-size: 10px;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 6px 0;
-    transition: color 0.2s;
-  }
-  .nav-btn.active { color: var(--accent); }
-  .nav-btn svg { width: 22px; height: 22px; }
+/* XP BAR */
+.xpwrap{background:var(--surface);border-radius:16px;padding:14px 16px;margin-bottom:12px;border:1px solid var(--border)}
+.xptop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.xplv{font-size:13px;font-weight:700;color:var(--accent)}
+.xppt{font-size:12px;color:var(--t2)}
+.xptrack{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.xpbar{height:100%;background:linear-gradient(90deg,var(--accent),#FFB347);border-radius:3px;transition:width .6s}
+.xpnxt{font-size:11px;color:var(--t3);margin-top:5px}
 
-  /* HEADER */
-  .screen-header {
-    padding: 16px 20px 12px;
-    padding-top: calc(16px + env(safe-area-inset-top));
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .screen-title { font-size: 22px; font-weight: 700; }
-  .screen-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+/* REVIEW REMINDER */
+.rrem{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:14px;padding:14px;margin-bottom:12px;display:none;gap:12px;align-items:flex-start}
+.rrem.show{display:flex}
+.rrem-icon{font-size:24px;flex-shrink:0;margin-top:2px}
+.rrem-title{font-size:14px;font-weight:700;color:var(--green)}
+.rrem-sub{font-size:12px;color:var(--t2);margin-top:2px}
+.rrem-btns{display:flex;gap:8px;margin-top:10px}
+.rrem-btn{flex:1;padding:9px;border-radius:10px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit}
+.rrem-p{background:var(--green);color:#fff}
+.rrem-s{background:var(--surface2);color:var(--t2);border:1px solid var(--border)}
 
-  /* CARDS */
-  .card {
-    background: var(--surface);
-    border-radius: 16px;
-    padding: 18px;
-    margin-bottom: 12px;
-    border: 1px solid var(--border);
-  }
-  .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 14px;
-  }
+/* TIP */
+.tip{background:var(--surface2);border-radius:14px;padding:13px 14px;margin-bottom:12px;border-left:3px solid var(--blue);display:flex;gap:10px;align-items:flex-start}
+.tip-i{font-size:18px;flex-shrink:0;margin-top:1px}
+.tip-t{font-size:13px;color:var(--t2);line-height:1.5;flex:1}
+.tip-t strong{color:var(--text);font-weight:600}
 
-  /* STEP PILLS */
-  .step-pill {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-  }
-  .step-pill:last-child { border-bottom: none; padding-bottom: 0; }
-  .step-pill:first-child { padding-top: 0; }
+/* QUOTE */
+.qcard{background:var(--surface2);border-radius:14px;padding:16px;margin-bottom:12px;border-left:3px solid var(--accent)}
+.qtxt{font-size:14px;line-height:1.6;color:var(--text);font-style:italic;margin-bottom:6px}
+.qauth{font-size:12px;color:var(--t3);font-weight:600}
 
-  .step-num {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  .step-num.s1 { background: rgba(255,107,53,0.15); color: var(--accent); }
-  .step-num.s2 { background: rgba(96,165,250,0.15); color: var(--blue); }
-  .step-num.s3 { background: rgba(167,139,250,0.15); color: var(--purple); }
-  .step-num.s4 { background: rgba(52,211,153,0.15); color: var(--green); }
+/* ACHIEVEMENTS */
+.achrow{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.achrow::-webkit-scrollbar{display:none}
+.achip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface2);min-width:68px}
+.achip.on{border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
+.achip.off{opacity:.3;filter:grayscale(1)}
+.ach-i{font-size:22px}
+.ach-n{font-size:10px;font-weight:600;color:var(--t2);text-align:center;line-height:1.3}
+.achip.on .ach-n{color:var(--amber)}
 
-  .step-info { flex: 1; }
-  .step-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-  .step-desc { font-size: 13px; color: var(--text2); }
-  .step-arrow { color: var(--text3); font-size: 18px; }
+/* STEP PILLS */
+.spill{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.spill:last-child{border-bottom:none;padding-bottom:0}
+.spill:first-child{padding-top:0}
+.snum{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0}
+.s1{background:rgba(255,107,53,.15);color:var(--accent)}
+.s2{background:rgba(96,165,250,.15);color:var(--blue)}
+.s4{background:rgba(52,211,153,.15);color:var(--green)}
+.si{flex:1}
+.sn{font-size:15px;font-weight:600;margin-bottom:2px}
+.sd{font-size:13px;color:var(--t2)}
 
-  /* TASKS */
-  .task-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .task-item:last-child { border-bottom: none; }
+/* TASKS */
+.ti{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--border)}
+.ti:last-child{border-bottom:none}
+.ti.urgent{background:rgba(255,60,60,.05);border-radius:12px;padding-left:10px;margin-left:-10px;border-left:3px solid var(--red)}
+.ti.urgent .ttxt{color:var(--red)}
+.ti.soon{border-left:3px solid var(--amber);padding-left:10px;margin-left:-10px}
+.tchk{width:24px;height:24px;border-radius:50%;border:2px solid var(--t3);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.tchk.on{background:var(--accent);border-color:var(--accent)}
+.tchk.on::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
+.tbody{flex:1;min-width:0}
+.ttxt{font-size:15px;line-height:1.4;word-break:break-word}
+.ttxt.done{color:var(--t3);text-decoration:line-through}
+.tmeta{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.tg-dl{background:rgba(255,107,53,.15);color:var(--accent)}
+.tg-nx{background:rgba(96,165,250,.15);color:var(--blue)}
+.tg-wt{background:rgba(167,139,250,.15);color:var(--purple)}
+.tg-sd{background:rgba(100,100,110,.2);color:var(--t2)}
+.tg-un{background:rgba(251,191,36,.15);color:var(--amber)}
+.tg-rc{background:rgba(52,211,153,.15);color:var(--green)}
+.tg-pr{background:rgba(167,139,250,.2);color:var(--purple)}
+.tdel{background:none;border:none;color:var(--t3);font-size:20px;cursor:pointer;padding:2px 4px;flex-shrink:0;line-height:1}
+.tmove{background:none;border:none;color:var(--t2);font-size:16px;cursor:pointer;padding:2px 4px;flex-shrink:0}
 
-  .task-check {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 2px solid var(--text3);
-    flex-shrink: 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    margin-top: 1px;
-  }
-  .task-check.done {
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-  .task-check.done::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
+/* DEADLINE TAGS */
+.dl-tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px}
+.dl-ov{background:rgba(255,60,60,.2);color:var(--red)}
+.dl-td{background:rgba(251,191,36,.2);color:var(--amber)}
+.dl-sn{background:rgba(251,191,36,.1);color:var(--amber)}
+.dl-ok{background:rgba(100,100,110,.15);color:var(--t3)}
 
-  .task-body { flex: 1; }
-  .task-text {
-    font-size: 15px;
-    line-height: 1.4;
-    transition: color 0.2s;
-  }
-  .task-text.done { color: var(--text3); text-decoration: line-through; }
-  .task-bucket {
-    display: inline-block;
-    margin-top: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 20px;
-  }
-  .bucket-deadline { background: rgba(255,107,53,0.15); color: var(--accent); }
-  .bucket-next { background: rgba(96,165,250,0.15); color: var(--blue); }
-  .bucket-waiting { background: rgba(167,139,250,0.15); color: var(--purple); }
-  .bucket-someday { background: rgba(100,100,110,0.2); color: var(--text2); }
+/* TOP 3 */
+.t3i{display:flex;align-items:flex-start;gap:12px;padding:15px 0;border-bottom:1px solid var(--border)}
+.t3i:last-child{border-bottom:none}
+.t3n{font-size:22px;font-weight:800;color:var(--accent);opacity:.3;width:26px;flex-shrink:0;line-height:1;margin-top:2px}
+.t3n.lit{opacity:1}
+.t3t{font-size:15px;font-weight:500;line-height:1.4;flex:1}
+.t3t.done{color:var(--t3);text-decoration:line-through}
+.t3c{width:28px;height:28px;border-radius:50%;border:2px solid var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.t3c.on{background:var(--green);border-color:var(--green)}
+.t3c.on::after{content:'✓';color:#fff;font-size:14px;font-weight:700}
 
-  .task-delete {
-    background: none;
-    border: none;
-    color: var(--text3);
-    font-size: 18px;
-    cursor: pointer;
-    padding: 4px;
-    flex-shrink: 0;
-  }
+/* RECURRING */
+.rci{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border)}
+.rci:last-child{border-bottom:none}
+.rcchk{width:24px;height:24px;border-radius:8px;border:2px solid var(--green);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.rcchk.on{background:var(--green);border-color:var(--green)}
+.rcchk.on::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
+.rctxt{flex:1;font-size:15px;font-weight:500;line-height:1.4}
+.rctxt.done{color:var(--t3);text-decoration:line-through}
 
-  /* INPUT AREA */
-  .input-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-  .input-field {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 16px;
-    color: var(--text);
-    font-size: 15px;
-    font-family: inherit;
-    outline: none;
-    -webkit-appearance: none;
-  }
-  .input-field:focus { border-color: var(--accent); }
-  .input-field::placeholder { color: var(--text3); }
+/* WEEK */
+.wgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:10px}
+.wday{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:600;background:var(--surface2);color:var(--t3)}
+.wday.done{background:var(--accent);color:#fff}
+.wday.today{border:2px solid var(--accent);color:var(--accent)}
+.wdlbl{font-size:9px;margin-bottom:1px;opacity:.7}
 
-  .btn-primary {
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 12px 18px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    font-family: inherit;
-    transition: opacity 0.15s;
-    -webkit-appearance: none;
-  }
-  .btn-primary:active { opacity: 0.8; }
+/* INPUTS */
+.inp{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:13px 14px;color:var(--text);font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--t3)}
+textarea.inp{resize:none;min-height:72px}
+input[type=date].inp{color-scheme:dark}
 
-  .btn-secondary {
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 18px;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
-    transition: opacity 0.15s;
-    -webkit-appearance: none;
-  }
-  .btn-secondary:active { opacity: 0.7; }
+.btn{border:none;border-radius:12px;padding:13px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s;-webkit-appearance:none;width:100%}
+.btn:active{opacity:.8}
+.bp{background:var(--accent);color:#fff}
+.bs{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.bsm{padding:9px 14px;font-size:13px;border-radius:10px}
+.bxs{padding:7px 12px;font-size:12px;border-radius:9px}
 
-  /* SELECT */
-  .select-field {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 16px;
-    color: var(--text);
-    font-size: 15px;
-    font-family: inherit;
-    outline: none;
-    width: 100%;
-    margin-bottom: 10px;
-    -webkit-appearance: none;
-    appearance: none;
-  }
+/* TRIGGER GRID */
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.tbtn{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:11px 12px;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;text-align:left;font-family:inherit;line-height:1.3;transition:all .15s;-webkit-appearance:none}
+.tbtn:active{background:var(--adim);border-color:var(--accent)}
+.ti2{font-size:18px;margin-bottom:3px;display:block}
 
-  /* TODAY SCREEN */
-  .today-big {
-    font-size: 48px;
-    font-weight: 800;
-    line-height: 1;
-    color: var(--accent);
-  }
-  .today-label { font-size: 14px; color: var(--text2); margin-top: 4px; }
+/* SORT FLOW */
+.sflow{display:none}
+.sflow.on{display:block}
 
-  .progress-bar-wrap {
-    height: 4px;
-    background: var(--surface2);
-    border-radius: 2px;
-    margin: 16px 0 4px;
-    overflow: hidden;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.4s ease;
-  }
-  .progress-label { font-size: 12px; color: var(--text2); }
+/* WIZARD */
+.qcard2{background:var(--surface);border-radius:20px;padding:20px;border:1px solid var(--border);margin-bottom:12px}
+.qbadge{display:inline-flex;align-items:center;gap:6px;background:var(--adim);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--accent);margin-bottom:14px}
+.qprev{font-size:16px;font-weight:600;margin-bottom:16px;line-height:1.4}
+.qtxt2{font-size:15px;color:var(--t2);line-height:1.5;margin-bottom:16px}
+.qhint{font-size:13px;color:var(--t3);line-height:1.5;margin-bottom:16px;background:var(--surface2);border-radius:10px;padding:10px 12px}
+.qopts{display:flex;flex-direction:column;gap:8px}
+.qopt{background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:13px 16px;font-size:15px;font-weight:500;color:var(--text);cursor:pointer;font-family:inherit;text-align:left;-webkit-appearance:none;transition:all .15s;display:flex;align-items:center;gap:10px}
+.qopt:active{border-color:var(--accent);background:var(--adim)}
+.qoi{font-size:18px;flex-shrink:0}
+.qob{flex:1}
+.qol{font-weight:600;font-size:15px}
+.qos{font-size:12px;color:var(--t2);margin-top:2px}
 
-  /* TOP 3 TASKS */
-  .top3-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-  }
-  .top3-item:last-child { border-bottom: none; }
-  .top3-num {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--accent);
-    opacity: 0.35;
-    width: 28px;
-    flex-shrink: 0;
-    line-height: 1;
-    margin-top: 2px;
-  }
-  .top3-num.active-num { opacity: 1; }
-  .top3-text { font-size: 16px; font-weight: 500; line-height: 1.4; flex: 1; }
-  .top3-text.done-text { color: var(--text3); text-decoration: line-through; }
-  .top3-check {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    border: 2px solid var(--text3);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.2s;
-  }
-  .top3-check.checked { background: var(--green); border-color: var(--green); }
-  .top3-check.checked::after { content: '✓'; color: white; font-size: 14px; font-weight: 700; }
+/* BUCKET RESULT */
+.bres{border-radius:20px;padding:22px 20px;margin-bottom:12px}
+.bres.r-dl{background:rgba(255,107,53,.08);border:1.5px solid rgba(255,107,53,.3)}
+.bres.r-nx{background:rgba(96,165,250,.08);border:1.5px solid rgba(96,165,250,.3)}
+.bres.r-wt{background:rgba(167,139,250,.08);border:1.5px solid rgba(167,139,250,.3)}
+.bres.r-sd{background:rgba(100,100,110,.1);border:1.5px solid rgba(100,100,110,.25)}
+.bres.r-nw{background:rgba(52,211,153,.08);border:1.5px solid rgba(52,211,153,.3)}
+.bres-icon{font-size:32px;margin-bottom:10px}
+.bres-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.bres-task{font-size:15px;font-weight:500;color:var(--text);background:var(--surface2);border-radius:10px;padding:10px 12px;margin-bottom:16px;line-height:1.4}
+.bres-desc{font-size:14px;color:var(--t2);line-height:1.5;margin-bottom:16px}
 
-  /* REVIEW */
-  .review-section { margin-bottom: 20px; }
-  .review-q {
-    font-size: 15px;
-    font-weight: 500;
-    margin-bottom: 10px;
-    line-height: 1.4;
-  }
-  .review-textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    color: var(--text);
-    font-size: 15px;
-    font-family: inherit;
-    outline: none;
-    resize: none;
-    min-height: 80px;
-    -webkit-appearance: none;
-  }
-  .review-textarea:focus { border-color: var(--accent); }
+/* MODAL */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-end}
+.mo.open{display:flex}
+.ms{background:var(--surface);border-radius:24px 24px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));width:100%;max-width:430px;margin:0 auto;max-height:88vh;overflow-y:auto}
+.mhandle{width:36px;height:4px;background:var(--t3);border-radius:2px;margin:0 auto 18px}
+.mtitle{font-size:18px;font-weight:700;margin-bottom:16px}
+.mlabel{font-size:13px;color:var(--t2);margin-bottom:6px;font-weight:500}
 
-  /* TRIGGER BUTTONS */
-  .trigger-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .trigger-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px;
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: left;
-    font-family: inherit;
-    line-height: 1.3;
-    transition: all 0.15s;
-    -webkit-appearance: none;
-  }
-  .trigger-btn:active { background: var(--accent-dim); border-color: var(--accent); }
-  .trigger-icon { font-size: 18px; margin-bottom: 4px; display: block; }
+/* BUCKET CARDS */
+.bcards{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.bcard{border-radius:14px;padding:14px;cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);transition:all .15s;display:flex;align-items:flex-start;gap:12px}
+.bcard:active{opacity:.8}
+.bcard.sel-deadline{border-color:var(--accent);background:rgba(255,107,53,.08)}
+.bcard.sel-next{border-color:var(--blue);background:rgba(96,165,250,.08)}
+.bcard.sel-waiting{border-color:var(--purple);background:rgba(167,139,250,.08)}
+.bcard.sel-someday{border-color:var(--t3);background:rgba(100,100,110,.1)}
+.bc-i{font-size:22px;flex-shrink:0}
+.bc-n{font-size:14px;font-weight:700}
+.bc-d{font-size:12px;color:var(--t2);margin-top:2px;line-height:1.4}
+.bc-h{font-size:11px;color:var(--t3);margin-top:4px;font-style:italic}
 
-  /* STAT CHIPS */
-  .stat-row { display: flex; gap: 10px; margin-bottom: 12px; }
-  .stat-chip {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 12px;
-    text-align: center;
-  }
-  .stat-chip-num { font-size: 28px; font-weight: 800; color: var(--accent); }
-  .stat-chip-label { font-size: 11px; color: var(--text2); margin-top: 2px; font-weight: 500; }
+/* TOP3 MODAL */
+.t3si{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.t3si:last-child{border-bottom:none}
+.t3sc{width:24px;height:24px;border-radius:50%;border:2px solid var(--t3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.t3sc.on{background:var(--accent);border-color:var(--accent)}
+.t3sc.on::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
 
-  /* EMPTY STATE */
-  .empty-state {
-    text-align: center;
-    padding: 32px 20px;
-    color: var(--text3);
-  }
-  .empty-icon { font-size: 36px; margin-bottom: 10px; }
-  .empty-text { font-size: 15px; line-height: 1.5; }
+/* PROJECT styles */
+.proj-card{background:var(--surface);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid rgba(167,139,250,.25)}
+.proj-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer}
+.proj-icon{font-size:18px}
+.proj-name{font-size:15px;font-weight:700;flex:1}
+.proj-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(167,139,250,.15);color:var(--purple)}
+.proj-chevron{color:var(--t3);font-size:18px;transition:transform .2s}
+.proj-chevron.open{transform:rotate(90deg)}
+.proj-body{display:none}
+.proj-body.open{display:block}
+.proj-sub-list{margin-bottom:10px}
+.sub-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.sub-item:last-child{border-bottom:none}
+.sub-chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--t3);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.sub-chk.on{background:var(--blue);border-color:var(--blue)}
+.sub-chk.on::after{content:'✓';color:#fff;font-size:10px;font-weight:700}
+.sub-txt{flex:1;font-size:14px;line-height:1.4;color:var(--t2)}
+.sub-txt.done{text-decoration:line-through;color:var(--t3)}
+.sub-del{background:none;border:none;color:var(--t3);font-size:16px;cursor:pointer;padding:2px}
+.proj-add-row{display:flex;gap:8px;margin-top:8px}
+.proj-prog{height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:10px}
+.proj-prog-fill{height:100%;background:var(--purple);border-radius:2px;transition:width .3s}
+.proj-prog-lbl{font-size:11px;color:var(--t3);margin-bottom:8px}
 
-  /* STREAK */
-  .streak-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--accent-dim);
-    border: 1px solid rgba(255,107,53,0.25);
-    border-radius: 12px;
-    padding: 10px 14px;
-    margin-bottom: 12px;
-  }
-  .streak-fire { font-size: 22px; }
-  .streak-text { font-size: 14px; font-weight: 600; color: var(--accent); }
-  .streak-sub { font-size: 12px; color: var(--text2); }
+/* SOMEDAY ACTIVATE */
+.sd-act{background:none;border:1px solid rgba(96,165,250,.3);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;font-family:inherit}
+.sd-act:active{background:rgba(96,165,250,.1)}
 
-  /* MODAL */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 200;
-    align-items: flex-end;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal-sheet {
-    background: var(--surface);
-    border-radius: 24px 24px 0 0;
-    padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
-    width: 100%;
-    max-width: 430px;
-    margin: 0 auto;
-  }
-  .modal-handle {
-    width: 36px; height: 4px;
-    background: var(--text3);
-    border-radius: 2px;
-    margin: 0 auto 20px;
-  }
-  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-  .modal-label { font-size: 13px; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+/* ACTIVE TASKS BLOCK */
+.act-tab-row{display:flex;gap:6px;margin-bottom:14px}
+.act-tab{flex:1;padding:8px 6px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);font-size:12px;font-weight:600;color:var(--t3);cursor:pointer;font-family:inherit;text-align:center;transition:all .15s}
+.act-tab.on{background:var(--adim);border-color:var(--accent);color:var(--accent)}
+.act-task-item{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--border)}
+.act-task-item:last-child{border-bottom:none}
+.act-task-item.urgent{border-left:3px solid var(--red);padding-left:10px;margin-left:-10px}
+.act-task-item.soon{border-left:3px solid var(--amber);padding-left:10px;margin-left:-10px}
 
-  /* BUCKET PICKER */
-  .bucket-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-  .bucket-opt {
-    padding: 8px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.15s;
-    -webkit-appearance: none;
-    background: var(--surface2);
-    color: var(--text2);
-  }
-  .bucket-opt.selected-deadline { background: rgba(255,107,53,0.15); color: var(--accent); border-color: var(--accent); }
-  .bucket-opt.selected-next { background: rgba(96,165,250,0.15); color: var(--blue); border-color: var(--blue); }
-  .bucket-opt.selected-waiting { background: rgba(167,139,250,0.15); color: var(--purple); border-color: var(--purple); }
-  .bucket-opt.selected-someday { background: rgba(100,100,110,0.2); color: var(--text2); border-color: var(--text3); }
+/* UNSORTED BADGE on nav */
+.unsorted-dot{display:none;width:8px;height:8px;background:var(--amber);border-radius:50%;position:absolute;top:4px;right:14px}
+.nb{position:relative}
 
-  textarea { resize: none; }
+/* QUICK SORT — bucket picker inline */
+.qs-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.qs-btn{padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--t2);transition:all .15s;-webkit-appearance:none}
+.qs-btn:active{opacity:.7}
+.qs-dl{border-color:rgba(255,107,53,.4);color:var(--accent);background:rgba(255,107,53,.08)}
+.qs-nx{border-color:rgba(96,165,250,.4);color:var(--blue);background:rgba(96,165,250,.08)}
+.qs-wt{border-color:rgba(167,139,250,.4);color:var(--purple);background:rgba(167,139,250,.08)}
+.qs-sd{border-color:rgba(100,100,110,.3);color:var(--t2)}
+.qs-pr{border-color:rgba(167,139,250,.4);color:var(--purple);background:rgba(167,139,250,.08)}
+.qs-task-card{background:var(--surface);border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid var(--border)}
+.qs-task-text{font-size:15px;font-weight:600;margin-bottom:10px;line-height:1.4}
 
-  .section-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 8px 0 16px;
-  }
+/* XP TOAST */
+.xptoast{position:fixed;top:calc(60px + env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-20px);background:var(--surface);border:1px solid rgba(255,107,53,.3);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;color:var(--accent);z-index:300;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.xptoast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  .week-grid {
-    display: grid;
-    grid-template-columns: repeat(7,1fr);
-    gap: 6px;
-    margin-top: 10px;
-  }
-  .week-day {
-    aspect-ratio: 1;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 600;
-    background: var(--surface2);
-    color: var(--text3);
-  }
-  .week-day.done-day { background: var(--accent); color: white; }
-  .week-day.today-day { border: 2px solid var(--accent); color: var(--accent); }
-  .week-day-label { font-size: 9px; margin-bottom: 2px; opacity: 0.7; }
+/* EMPTY */
+.empty{text-align:center;padding:24px 16px;color:var(--t3)}
+.empty-i{font-size:32px;margin-bottom:8px}
+.empty-t{font-size:14px;line-height:1.5}
+
+/* REV */
+.revq{font-size:15px;font-weight:500;margin-bottom:8px;line-height:1.4}
+.revsec{margin-bottom:14px}
 </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- ══════════════ TODAY ══════════════ -->
-  <div class="screen active" id="screen-today">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title">Сегодня</div>
-        <div class="screen-sub" id="today-date"></div>
+<!-- TODAY -->
+<div class="screen active" id="sc-today">
+  <div class="hdr">
+    <div class="hdr-row">
+      <div><div class="htitle">Сегодня</div><div class="hsub" id="today-date"></div></div>
+      <div id="streak-badge" style="display:none;align-items:center;gap:6px;background:var(--adim);border:1px solid rgba(255,107,53,.2);border-radius:10px;padding:6px 10px">
+        <span style="font-size:18px">🔥</span>
+        <div><div style="font-size:13px;font-weight:700;color:var(--accent)" id="streak-num"></div><div style="font-size:10px;color:var(--t2)">дней подряд</div></div>
       </div>
-      <div id="streak-mini" style="font-size:13px;font-weight:700;color:var(--accent)"></div>
-    </div>
-    <div class="scroll-area">
-
-      <div class="stat-row">
-        <div class="stat-chip">
-          <div class="stat-chip-num" id="stat-total">0</div>
-          <div class="stat-chip-label">всего задач</div>
-        </div>
-        <div class="stat-chip">
-          <div class="stat-chip-num" id="stat-done">0</div>
-          <div class="stat-chip-label">выполнено</div>
-        </div>
-        <div class="stat-chip">
-          <div class="stat-chip-num" id="stat-next">0</div>
-          <div class="stat-chip-label">следующие</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">3 главные задачи дня</div>
-        <div id="top3-list"></div>
-        <div style="margin-top:12px">
-          <button class="btn-secondary" style="width:100%;font-size:14px" onclick="openTop3Modal()">Выбрать главные задачи</button>
-        </div>
-      </div>
-
-      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
-      <div class="progress-label" id="progress-label">Нет выполненных задач</div>
-
-      <div style="height:12px"></div>
-
-      <div class="card">
-        <div class="card-title">Ежедневный обзор</div>
-        <div class="step-pill" onclick="navigate('collect')">
-          <div class="step-num s1">1</div>
-          <div class="step-info">
-            <div class="step-name">Сбор</div>
-            <div class="step-desc">Выгрузить новые задачи из головы</div>
-          </div>
-          <div class="step-arrow">›</div>
-        </div>
-        <div class="step-pill" onclick="navigate('sort')">
-          <div class="step-num s2">2</div>
-          <div class="step-info">
-            <div class="step-name">Сортировка</div>
-            <div class="step-desc">Разложить задачи по корзинам</div>
-          </div>
-          <div class="step-arrow">›</div>
-        </div>
-        <div class="step-pill" onclick="navigate('review')">
-          <div class="step-num s4">4</div>
-          <div class="step-info">
-            <div class="step-name">Обзор дня</div>
-            <div class="step-desc">Закрыть день, подготовить завтра</div>
-          </div>
-          <div class="step-arrow">›</div>
-        </div>
-      </div>
-
     </div>
   </div>
-
-  <!-- ══════════════ COLLECT ══════════════ -->
-  <div class="screen" id="screen-collect">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title">Шаг 1 — Сбор</div>
-        <div class="screen-sub">Выгружаем всё из головы</div>
-      </div>
-    </div>
-    <div class="scroll-area">
-
-      <div class="card">
-        <div class="card-title">Триггеры — что мог забыть?</div>
-        <div class="trigger-grid">
-          <button class="trigger-btn" onclick="setTrigger('Работа: ')"><span class="trigger-icon">💼</span>Работа</button>
-          <button class="trigger-btn" onclick="setTrigger('Люди: ')"><span class="trigger-icon">👥</span>Написать/позвонить</button>
-          <button class="trigger-btn" onclick="setTrigger('Дом: ')"><span class="trigger-icon">🏠</span>Домашние дела</button>
-          <button class="trigger-btn" onclick="setTrigger('Финансы: ')"><span class="trigger-icon">💰</span>Финансы</button>
-          <button class="trigger-btn" onclick="setTrigger('Здоровье: ')"><span class="trigger-icon">❤️</span>Здоровье</button>
-          <button class="trigger-btn" onclick="setTrigger('Идея: ')"><span class="trigger-icon">💡</span>Идея</button>
+  <div class="scroll">
+    <div class="rrem" id="rrem">
+      <div class="rrem-icon">🌙</div>
+      <div style="flex:1">
+        <div class="rrem-title">Время обзора дня!</div>
+        <div class="rrem-sub">22:00 — закрой день по системе. Займёт 5 минут.</div>
+        <div class="rrem-btns">
+          <button class="rrem-btn rrem-p" onclick="navigate('review')">Начать обзор →</button>
+          <button class="rrem-btn rrem-s" onclick="addToCalendar()">📅 В календарь</button>
         </div>
       </div>
-
-      <div class="card">
-        <div class="card-title">Добавить задачу</div>
-        <textarea class="input-field review-textarea" id="collect-input" placeholder="Что нужно сделать?" rows="2"></textarea>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn-secondary" style="flex:1" onclick="quickAdd('someday')">Когда-нибудь</button>
-          <button class="btn-primary" style="flex:1" onclick="quickAdd('next')">В следующие</button>
-        </div>
-      </div>
-
-      <div class="card" id="unsorted-card">
-        <div class="card-title">Только что добавлено</div>
-        <div id="unsorted-list"><div class="empty-state"><div class="empty-icon">✏️</div><div class="empty-text">Пиши всё подряд,<br>не фильтруй</div></div></div>
-      </div>
-
     </div>
-  </div>
+    <div class="xpwrap">
+      <div class="xptop"><div class="xplv" id="xp-lv">Уровень 1 — Новичок</div><div class="xppt" id="xp-pt">0 XP</div></div>
+      <div class="xptrack"><div class="xpbar" id="xp-bar" style="width:0%"></div></div>
+      <div class="xpnxt" id="xp-nxt">До следующего уровня: 100 XP</div>
+    </div>
+    <div class="srow">
+      <div class="schip"><div class="snum" id="s-total">0</div><div class="slbl">всего</div></div>
+      <div class="schip"><div class="snum" id="s-done">0</div><div class="slbl">готово</div></div>
+      <div class="schip"><div class="snum" id="s-unsorted" style="color:var(--amber)">0</div><div class="slbl" style="color:var(--amber)">не разобрано</div></div>
+    </div>
+    <div class="pwrap"><div class="pfill" id="prog" style="width:0%"></div></div>
+    <div class="plbl" id="prog-lbl"></div>
+    <div class="tip" id="tip-today"></div>
 
-  <!-- ══════════════ SORT ══════════════ -->
-  <div class="screen" id="screen-sort">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title">Шаг 2 — Сортировка</div>
-        <div class="screen-sub">Каждой задаче своё место</div>
+    <!-- UNSORTED ALERT -->
+    <div id="unsorted-alert" style="display:none;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:14px;padding:12px 14px;margin-bottom:12px;display:none;align-items:center;gap:10px">
+      <span style="font-size:20px">⚠️</span>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;color:var(--amber)">Есть несортированные задачи</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:2px" id="unsorted-alert-count"></div>
+      </div>
+      <button onclick="navigate('sort')" style="background:var(--amber);color:#000;border:none;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Разобрать →</button>
+    </div>
+
+    <!-- ACTIVE TASKS -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="ctitle" style="margin-bottom:0">Актуальные задачи</div>
+        <button onclick="openTop3Modal()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer">Выбрать главные</button>
+      </div>
+      <div class="act-tab-row">
+        <button class="act-tab on" id="tab-top3" onclick="switchTab('top3')">🎯 Главные</button>
+        <button class="act-tab" id="tab-today" onclick="switchTab('today')">📋 Сегодня</button>
+        <button class="act-tab" id="tab-inwork" onclick="switchTab('inwork')">⚙️ В работе</button>
+      </div>
+      <div id="act-content"></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="ctitle" style="margin-bottom:0">🔄 Ежедневные привычки</div>
+        <button onclick="openRecModal()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer">+ добавить</button>
+      </div>
+      <div id="rec-list"></div>
+    </div>
+    <div class="card" id="dl-today-card" style="display:none">
+      <div class="ctitle">🔴 Горящие дедлайны</div>
+      <div id="dl-today-list"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Достижения</div>
+      <div class="achrow" id="ach-row"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Навигация</div>
+      <div class="spill" onclick="navigate('collect')">
+        <div class="snum s1">1</div><div class="si"><div class="sn">Сбор</div><div class="sd">Выгрузить задачи из головы</div></div>
+        <span style="color:var(--t3);font-size:20px">›</span>
+      </div>
+      <div class="spill" onclick="navigate('sort')">
+        <div class="snum s2">2</div><div class="si"><div class="sn">Сортировка</div><div class="sd">Разложить по корзинам</div></div>
+        <span style="color:var(--t3);font-size:20px">›</span>
+      </div>
+      <div class="spill" onclick="navigate('review')">
+        <div class="snum s4">4</div><div class="si"><div class="sn">Обзор дня</div><div class="sd">Закрыть день</div></div>
+        <span style="color:var(--t3);font-size:20px">›</span>
       </div>
     </div>
-    <div class="scroll-area">
-
-      <div class="card">
-        <div class="card-title">С дедлайном 🔴</div>
-        <div id="bucket-deadline"><div class="empty-state" style="padding:16px 0"><div class="empty-text" style="font-size:13px">Пусто</div></div></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Следующие действия 🔵</div>
-        <div id="bucket-next"><div class="empty-state" style="padding:16px 0"><div class="empty-text" style="font-size:13px">Пусто</div></div></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Ожидание 🟣</div>
-        <div id="bucket-waiting"><div class="empty-state" style="padding:16px 0"><div class="empty-text" style="font-size:13px">Пусто</div></div></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Когда-нибудь ⚪</div>
-        <div id="bucket-someday"><div class="empty-state" style="padding:16px 0"><div class="empty-text" style="font-size:13px">Пусто</div></div></div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ══════════════ REVIEW ══════════════ -->
-  <div class="screen" id="screen-review">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title">Шаг 4 — Обзор</div>
-        <div class="screen-sub">Закрываем день</div>
-      </div>
-    </div>
-    <div class="scroll-area">
-
-      <div class="card">
-        <div class="card-title">Статистика дня</div>
-        <div class="stat-row">
-          <div class="stat-chip">
-            <div class="stat-chip-num" id="rev-done">0</div>
-            <div class="stat-chip-label">выполнено</div>
-          </div>
-          <div class="stat-chip">
-            <div class="stat-chip-num" id="rev-pending">0</div>
-            <div class="stat-chip-label">в процессе</div>
-          </div>
-        </div>
-        <div class="card-title" style="margin-bottom:8px">Активность недели</div>
-        <div class="week-grid" id="week-grid"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Рефлексия</div>
-        <div class="review-section">
-          <div class="review-q">Что сегодня прошло хорошо?</div>
-          <textarea class="review-textarea" id="rev-good" placeholder="Напиши хотя бы одну вещь..."></textarea>
-        </div>
-        <div class="review-section">
-          <div class="review-q">Что можно улучшить завтра?</div>
-          <textarea class="review-textarea" id="rev-improve" placeholder="Честно, без самокритики..."></textarea>
-        </div>
-        <div class="review-section">
-          <div class="review-q">Главный приоритет на завтра</div>
-          <textarea class="review-textarea" id="rev-tomorrow" placeholder="Одна самая важная вещь..."></textarea>
-        </div>
-      </div>
-
-      <button class="btn-primary" style="width:100%;padding:16px;font-size:16px" onclick="saveReview()">Закрыть день ✓</button>
-
-    </div>
-  </div>
-
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" id="nav-today" onclick="navigate('today')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Сегодня
-    </button>
-    <button class="nav-btn" id="nav-collect" onclick="navigate('collect')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Сбор
-    </button>
-    <button class="nav-btn" id="nav-sort" onclick="navigate('sort')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      Корзины
-    </button>
-    <button class="nav-btn" id="nav-review" onclick="navigate('review')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-      Обзор
-    </button>
-  </nav>
-</div>
-
-<!-- ADD TASK MODAL -->
-<div class="modal-overlay" id="modal-add" onclick="closeModal('modal-add')">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Добавить задачу</div>
-    <div class="modal-label">Задача</div>
-    <textarea class="input-field review-textarea" id="modal-task-text" placeholder="Что нужно сделать?" rows="2" style="margin-bottom:14px;width:100%"></textarea>
-    <div class="modal-label">Корзина</div>
-    <div class="bucket-picker">
-      <button class="bucket-opt" data-bucket="deadline" onclick="selectBucket('deadline')">🔴 Дедлайн</button>
-      <button class="bucket-opt" data-bucket="next" onclick="selectBucket('next')">🔵 Следующее</button>
-      <button class="bucket-opt" data-bucket="waiting" onclick="selectBucket('waiting')">🟣 Ожидание</button>
-      <button class="bucket-opt" data-bucket="someday" onclick="selectBucket('someday')">⚪ Когда-нибудь</button>
-    </div>
-    <button class="btn-primary" style="width:100%;padding:14px;font-size:16px;margin-top:4px" onclick="addTaskFromModal()">Добавить</button>
   </div>
 </div>
 
-<!-- TOP 3 MODAL -->
-<div class="modal-overlay" id="modal-top3" onclick="closeModal('modal-top3')">
-  <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:80vh;overflow-y:auto">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Выбери 3 главные задачи</div>
-    <div id="modal-top3-list"></div>
-    <button class="btn-primary" style="width:100%;padding:14px;font-size:16px;margin-top:16px" onclick="closeModal('modal-top3');renderToday()">Готово</button>
+<!-- COLLECT -->
+<div class="screen" id="sc-collect">
+  <div class="hdr"><div class="htitle">Шаг 1 — Сбор</div><div class="hsub">Пиши всё подряд, не фильтруй</div></div>
+  <div class="scroll">
+    <div class="tip" id="tip-collect"></div>
+    <div class="card">
+      <div class="ctitle">Что мог забыть?</div>
+      <div class="tgrid">
+        <button class="tbtn" onclick="setT('Работа: ')"><span class="ti2">💼</span>Работа</button>
+        <button class="tbtn" onclick="setT('Написать ')"><span class="ti2">👥</span>Люди</button>
+        <button class="tbtn" onclick="setT('Дом: ')"><span class="ti2">🏠</span>Дом</button>
+        <button class="tbtn" onclick="setT('Финансы: ')"><span class="ti2">💰</span>Финансы</button>
+        <button class="tbtn" onclick="setT('Здоровье: ')"><span class="ti2">❤️</span>Здоровье</button>
+        <button class="tbtn" onclick="setT('Идея: ')"><span class="ti2">💡</span>Идея</button>
+      </div>
+    </div>
+    <div class="card">
+      <textarea class="inp" id="col-inp" placeholder="Напиши задачу или мысль..." rows="3"></textarea>
+      <button class="btn bp" style="margin-top:10px" onclick="colAdd()">Добавить в список →</button>
+    </div>
+    <div class="card">
+      <div class="ctitle" id="col-count">Не разобрано — 0</div>
+      <div id="col-list"></div>
+    </div>
   </div>
 </div>
+
+<!-- SORT -->
+<div class="screen" id="sc-sort">
+  <div class="hdr">
+    <div class="htitle">Шаг 2 — Сортировка</div>
+    <div class="hsub" id="sort-sub">Разбираем задачи по корзинам</div>
+  </div>
+  <div class="scroll">
+    <div class="sflow on" id="sort-wiz">
+      <!-- Quick sort toggle -->
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn bs bsm" style="flex:1;font-size:12px" id="wiz-mode-btn" onclick="toggleWizMode()">⚡ Быстрый выбор</button>
+        <button class="btn bs bsm" style="flex:1;font-size:12px" onclick="showBkts()">📂 Все корзины</button>
+      </div>
+      <div id="wiz-content"></div>
+    </div>
+    <div class="sflow" id="sort-bkts">
+      <div class="card">
+        <div class="ctitle">🔴 С дедлайном</div>
+        <div id="b-deadline"></div>
+      </div>
+      <!-- PROJECTS section -->
+      <div id="projects-section"></div>
+      <div class="card">
+        <div class="ctitle">🔵 Следующие действия</div>
+        <div id="b-next"></div>
+      </div>
+      <div class="card">
+        <div class="ctitle">🟣 Ожидание</div>
+        <div id="b-waiting"></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="ctitle" style="margin-bottom:0">⚪ Когда-нибудь</div>
+          <span style="font-size:12px;color:var(--t3)">нажми → чтобы активировать</span>
+        </div>
+        <div id="b-someday"></div>
+      </div>
+      <button class="btn bs" onclick="showWiz()">← Разобрать новые задачи</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW -->
+<div class="screen" id="sc-review">
+  <div class="hdr"><div class="htitle">Шаг 4 — Обзор</div><div class="hsub">Закрываем день</div></div>
+  <div class="scroll">
+    <div class="qcard" id="rev-quote"></div>
+    <div class="tip" id="tip-review"></div>
+    <div class="card">
+      <div class="ctitle">Итоги дня</div>
+      <div class="srow" style="margin-bottom:0">
+        <div class="schip"><div class="snum" id="rv-done">0</div><div class="slbl">выполнено</div></div>
+        <div class="schip"><div class="snum" id="rv-left">0</div><div class="slbl">осталось</div></div>
+      </div>
+      <div class="ctitle" style="margin-top:16px;margin-bottom:8px">Неделя</div>
+      <div class="wgrid" id="week-grid"></div>
+    </div>
+    <div class="card">
+      <div class="revsec"><div class="revq">Что сегодня прошло хорошо? 🌟</div><textarea class="inp" id="rv-good" placeholder="Напиши хотя бы одну вещь..." rows="2"></textarea></div>
+      <div class="revsec"><div class="revq">Что улучшить завтра? 🔧</div><textarea class="inp" id="rv-improve" placeholder="Честно, без самокритики..." rows="2"></textarea></div>
+      <div class="revsec"><div class="revq">Главное на завтра 🎯</div><textarea class="inp" id="rv-tomorrow" placeholder="Одна самая важная задача..." rows="2"></textarea></div>
+    </div>
+    <button class="btn bp" style="padding:16px;font-size:16px" onclick="saveReview()">Закрыть день ✓</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="bnav">
+  <button class="nb on" id="nav-today" onclick="navigate('today')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Сегодня
+  </button>
+  <button class="nb" id="nav-collect" onclick="navigate('collect')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Сбор
+    <div class="unsorted-dot" id="unsorted-dot"></div>
+  </button>
+  <button class="nb" id="nav-sort" onclick="navigate('sort')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    Сортировка
+  </button>
+  <button class="nb" id="nav-review" onclick="navigate('review')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    Обзор
+  </button>
+</nav>
+</div>
+
+<!-- MODALS -->
+<div class="mo" id="mo-rec" onclick="closeMo('mo-rec')">
+  <div class="ms" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <div class="mtitle">🔄 Ежедневная привычка</div>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:16px;line-height:1.5">Появляется автоматически каждый день. Например: зарядка, чтение, дневник.</p>
+    <input type="text" class="inp" id="rec-inp" placeholder="Зарядка 20 минут" style="margin-bottom:12px">
+    <button class="btn bp" onclick="addRec()">Добавить привычку</button>
+  </div>
+</div>
+
+<div class="mo" id="mo-top3" onclick="closeMo('mo-top3')">
+  <div class="ms" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <div class="mtitle">Выбери до 3 задач на сегодня</div>
+    <div id="mo-top3-list"></div>
+    <button class="btn bp" style="margin-top:14px" onclick="closeMo('mo-top3');renderToday()">Сохранить</button>
+  </div>
+</div>
+
+<div class="mo" id="mo-move" onclick="closeMo('mo-move')">
+  <div class="ms" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <div class="mtitle">Куда переместить?</div>
+    <div class="bcards" id="mo-move-cards"></div>
+    <button class="btn bs bsm" onclick="closeMo('mo-move')">Отмена</button>
+  </div>
+</div>
+
+<!-- PROJECT MODAL — create / add subtask -->
+<div class="mo" id="mo-proj" onclick="closeMo('mo-proj')">
+  <div class="ms" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="mo-proj-title">Новый проект</div>
+    <div id="mo-proj-body"></div>
+  </div>
+</div>
+
+<div class="xptoast" id="xp-toast"></div>
 
 <script>
-// ═══════════ STATE ═══════════
-let state = {
-  tasks: [],
-  top3: [],           // ids of top 3 tasks
-  reviews: {},        // date -> {good, improve, tomorrow}
-  streak: 0,
-  lastReviewDate: null,
-  weekActivity: {}    // date -> bool
-};
-
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
 const DAYS = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
 const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+const BUCKETS = {
+  deadline:{ icon:'🔴', name:'С дедлайном', desc:'Конкретная дата — провалится, если не сделать вовремя.', hint:'«Сдать отчёт до пятницы», «Оплатить до 1-го»', cls:'tg-dl', col:'var(--accent)' },
+  next:    { icon:'🔵', name:'Следующие действия', desc:'Конкретный шаг — можно сделать прямо сейчас.', hint:'«Позвонить в банк», «Написать первый абзац»', cls:'tg-nx', col:'var(--blue)' },
+  waiting: { icon:'🟣', name:'Ожидание', desc:'Ты сделал своё — ждёшь другого человека.', hint:'«Жду ответа от клиента», «Ждём дизайн»', cls:'tg-wt', col:'var(--purple)' },
+  someday: { icon:'⚪', name:'Когда-нибудь', desc:'Идеи без срока. Можно активировать в любой момент.', hint:'«Научиться гитаре», «Съездить в Грузию»', cls:'tg-sd', col:'var(--t2)' }
+};
+
+// State — tasks are simple tasks, projects have subtasks
+let S = {
+  tasks:[], projects:[], top3:[], reviews:{}, streak:0, lastReview:null,
+  weekAct:{}, recurring:[], recurringDone:{}, xp:0, unlocked:[]
+};
+
+function todayKey(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function uid(){ return Date.now()+Math.random(); }
+function save(){ try{ localStorage.setItem('f4v3',JSON.stringify(S)); }catch(e){} }
+function load(){ try{ const r=localStorage.getItem('f4v3'); if(r){ const p=JSON.parse(r); S={...S,...p}; }}catch(e){} }
+
+// ═══════════════════════════════════════
+// XP
+// ═══════════════════════════════════════
+const XP_LEVELS=[
+  {min:0,max:100,lbl:'Новичок'},{min:100,max:250,lbl:'Ученик'},
+  {min:250,max:500,lbl:'Практик'},{min:500,max:900,lbl:'Мастер'},
+  {min:900,max:1500,lbl:'Эксперт'},{min:1500,max:99999,lbl:'Сенсей'}
+];
+function getLv(xp){ for(let i=XP_LEVELS.length-1;i>=0;i--) if(xp>=XP_LEVELS[i].min) return {i,...XP_LEVELS[i]}; return {i:0,...XP_LEVELS[0]}; }
+
+function addXP(n,reason){
+  S.xp=(S.xp||0)+n; save();
+  showToast(`+${n} XP — ${reason}`);
+  renderXP(); checkAch();
+}
+function showToast(msg){
+  const t=document.getElementById('xp-toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+function renderXP(){
+  const xp=S.xp||0, lv=getLv(xp);
+  const next=XP_LEVELS[Math.min(lv.i+1,XP_LEVELS.length-1)];
+  const pct=lv.i<XP_LEVELS.length-1?Math.min(100,Math.round((xp-lv.min)/(lv.max-lv.min)*100)):100;
+  document.getElementById('xp-lv').textContent=`Уровень ${lv.i+1} — ${lv.lbl}`;
+  document.getElementById('xp-pt').textContent=`${xp} XP`;
+  document.getElementById('xp-bar').style.width=pct+'%';
+  document.getElementById('xp-nxt').textContent=lv.i<XP_LEVELS.length-1?`До «${next.lbl}»: ещё ${lv.max-xp} XP`:'🏆 Максимальный уровень!';
 }
 
-function save() { localStorage.setItem('f4_state', JSON.stringify(state)); }
-function load() {
-  const raw = localStorage.getItem('f4_state');
-  if (raw) {
-    try { state = { ...state, ...JSON.parse(raw) }; } catch(e){}
-  }
+// ═══════════════════════════════════════
+// ACHIEVEMENTS
+// ═══════════════════════════════════════
+const ACHS=[
+  {id:'first_task',  icon:'✏️', name:'Первый шаг',  check:s=>s.tasks.length>=1},
+  {id:'first_proj',  icon:'📂', name:'Первый проект',check:s=>s.projects.length>=1},
+  {id:'first_sort',  icon:'📋', name:'Порядок',      check:s=>s.tasks.some(t=>t.bucket!=='unsorted')},
+  {id:'first_review',icon:'🌙', name:'Обзор дня',    check:s=>Object.keys(s.reviews||{}).length>=1},
+  {id:'streak3',     icon:'🔥', name:'3 дня подряд', check:s=>(s.streak||0)>=3},
+  {id:'streak7',     icon:'⚡', name:'Неделя!',       check:s=>(s.streak||0)>=7},
+  {id:'tasks10',     icon:'💪', name:'10 задач',      check:s=>s.tasks.filter(t=>t.done).length>=10},
+  {id:'top3done',    icon:'🎯', name:'Фокус дня',     check:s=>s.top3.length===3&&s.top3.every(id=>s.tasks.find(t=>t.id===id&&t.done))},
+];
+function checkAch(){
+  if(!S.unlocked) S.unlocked=[];
+  ACHS.forEach(a=>{ if(!S.unlocked.includes(a.id)&&a.check(S)){ S.unlocked.push(a.id); save(); setTimeout(()=>showToast(`🏆 ${a.name}!`),700); }});
+  renderAch();
+}
+function renderAch(){
+  const el=document.getElementById('ach-row'); if(!el) return;
+  el.innerHTML=ACHS.map(a=>`<div class="achip ${(S.unlocked||[]).includes(a.id)?'on':'off'}" title="${a.name}"><div class="ach-i">${a.icon}</div><div class="ach-n">${a.name}</div></div>`).join('');
 }
 
-// ═══════════ NAVIGATION ═══════════
-let currentScreen = 'today';
-function navigate(screen) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('screen-' + screen).classList.add('active');
-  const nb = document.getElementById('nav-' + screen);
-  if (nb) nb.classList.add('active');
-  currentScreen = screen;
-  if (screen === 'today') renderToday();
-  if (screen === 'sort') renderSort();
-  if (screen === 'review') renderReview();
-  if (screen === 'collect') renderCollect();
+// ═══════════════════════════════════════
+// TIPS & QUOTES
+// ═══════════════════════════════════════
+const TIPS={
+  today:[
+    {i:'💡',t:'<strong>Правило 3 задач.</strong> Focus4 рекомендует выбирать только 3 главные задачи на день. Это не ограничение — это фокус.'},
+    {i:'⏰',t:'<strong>Правило 2 минут.</strong> Если задача займёт меньше 2 минут — делай сейчас. Записывать дороже, чем сделать.'},
+    {i:'🎯',t:'<strong>Сначала — самое важное.</strong> Focus4 советует: начинай день с главной задачи, пока энергия на максимуме.'},
+    {i:'🔋',t:'<strong>Энергия важнее времени.</strong> У всех 24 часа. Разница в том, куда идёт твоя концентрация.'},
+  ],
+  collect:[
+    {i:'🧠',t:'<strong>Выгрузи всё.</strong> Пока задача в голове — она создаёт фоновый стресс. Записанная — освобождает мозг.'},
+    {i:'✏️',t:'<strong>Не фильтруй сейчас.</strong> На сборе пиши всё подряд. Фильтровать будешь на сортировке — это разные шаги.'},
+    {i:'📋',t:'<strong>Используй триггеры.</strong> Нажми на зону жизни — работа, люди, дом — чтобы не пропустить важное.'},
+  ],
+  review:[
+    {i:'🌙',t:'<strong>5 минут вечером</strong> экономят час утром. Закрытый день = голова свободна для сна и завтра.'},
+    {i:'📈',t:'<strong>Анализируй, не осуждай.</strong> «Что прошло хорошо» важнее «что я сделал не так». Мозг учится на успехах.'},
+    {i:'🎯',t:'<strong>Одна задача на завтра.</strong> Не список — одна главная. Просыпаешься и сразу знаешь, с чего начать.'},
+  ]
+};
+const QUOTES=[
+  {t:'Сфокусированная энергия на одну задачу всегда мощнее, чем распылённая на десять.',a:'— Focus4'},
+  {t:'Твой мозг — плохое место для хранения задач. Хорошее место — твоя система.',a:'— Focus4'},
+  {t:'Порядок в задачах создаёт порядок в голове. Не наоборот.',a:'— Focus4'},
+  {t:'Ежедневный обзор — не рутина. Это момент, когда ты берёшь жизнь в свои руки.',a:'— Focus4'},
+  {t:'Большинство людей заняты, но не продуктивны. Разница — в системе.',a:'— Focus4'},
+  {t:'Не нужно больше времени. Нужно знать, на что его тратить.',a:'— Focus4'},
+];
+function renderTip(key,id){
+  const tips=TIPS[key]; if(!tips) return;
+  const tip=tips[Math.floor(Date.now()/86400000)%tips.length];
+  const el=document.getElementById(id); if(el) el.innerHTML=`<div class="tip-i">${tip.i}</div><div class="tip-t">${tip.t}</div>`;
+}
+function renderQuote(){
+  const q=QUOTES[Math.floor(Date.now()/86400000)%QUOTES.length];
+  const el=document.getElementById('rev-quote'); if(el) el.innerHTML=`<div class="qtxt">«${q.t}»</div><div class="qauth">${q.a}</div>`;
 }
 
-// ═══════════ TASKS ═══════════
-function addTask(text, bucket) {
-  if (!text.trim()) return null;
-  const task = {
-    id: Date.now() + Math.random(),
-    text: text.trim(),
-    bucket: bucket || 'next',
-    done: false,
-    created: todayKey()
-  };
-  state.tasks.push(task);
-  save();
-  return task;
+// ═══════════════════════════════════════
+// REVIEW REMINDER
+// ═══════════════════════════════════════
+function checkReminder(){
+  const h=new Date().getHours();
+  const done=S.lastReview===todayKey();
+  const el=document.getElementById('rrem');
+  if(el) el.classList.toggle('show',h>=22&&!done);
+}
+function addToCalendar(){
+  const d=new Date(), ds=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','BEGIN:VEVENT',
+    `DTSTART;TZID=Asia/Almaty:${ds}T220000`,`DTEND;TZID=Asia/Almaty:${ds}T223000`,
+    'RRULE:FREQ=DAILY','SUMMARY:🌙 Обзор дня — Focus4',
+    'BEGIN:VALARM','TRIGGER:-PT0M','ACTION:DISPLAY','DESCRIPTION:Время обзора!','END:VALARM',
+    'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
+  a.download='focus4-review.ics'; a.click();
 }
 
-function toggleTask(id) {
-  const t = state.tasks.find(t => t.id === id);
-  if (t) { t.done = !t.done; save(); }
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+let cur='today';
+function navigate(sc){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('sc-'+sc).classList.add('active');
+  const nb=document.getElementById('nav-'+sc); if(nb) nb.classList.add('on');
+  cur=sc;
+  if(sc==='today') renderToday();
+  if(sc==='collect') renderCollect();
+  if(sc==='sort') renderSort();
+  if(sc==='review') renderReview();
 }
 
-function deleteTask(id) {
-  state.tasks = state.tasks.filter(t => t.id !== id);
-  state.top3 = state.top3.filter(i => i !== id);
-  save();
-}
-
-function bucketLabel(b) {
-  return {deadline:'🔴 Дедлайн', next:'🔵 Следующее', waiting:'🟣 Ожидание', someday:'⚪ Когда-нибудь'}[b] || b;
-}
-function bucketClass(b) {
-  return {deadline:'bucket-deadline', next:'bucket-next', waiting:'bucket-waiting', someday:'bucket-someday'}[b] || '';
-}
-
-// ═══════════ TODAY SCREEN ═══════════
-function renderToday() {
-  const now = new Date();
-  document.getElementById('today-date').textContent = `${now.getDate()} ${MONTHS[now.getMonth()]}, ${DAYS[now.getDay()]}`;
-
-  const total = state.tasks.length;
-  const done = state.tasks.filter(t => t.done).length;
-  const nextTasks = state.tasks.filter(t => t.bucket === 'next' && !t.done).length;
-
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-done').textContent = done;
-  document.getElementById('stat-next').textContent = nextTasks;
-
-  const pct = total > 0 ? Math.round(done/total*100) : 0;
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-label').textContent = total > 0 ? `${done} из ${total} задач выполнено (${pct}%)` : 'Нет задач — добавь через Сбор';
-
-  const streak = state.streak || 0;
-  document.getElementById('streak-mini').textContent = streak > 0 ? `🔥 ${streak}` : '';
-
-  renderTop3();
-}
-
-function renderTop3() {
-  const list = document.getElementById('top3-list');
-  const top3tasks = state.top3.map(id => state.tasks.find(t => t.id === id)).filter(Boolean);
-
-  if (top3tasks.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🎯</div><div class="empty-text">Выбери 3 главные задачи<br>на сегодня</div></div>`;
-    return;
-  }
-
-  list.innerHTML = top3tasks.map((t,i) => `
-    <div class="top3-item">
-      <div class="top3-num ${!t.done ? 'active-num' : ''}">${i+1}</div>
-      <div class="top3-text ${t.done ? 'done-text' : ''}">${t.text}</div>
-      <div class="top3-check ${t.done ? 'checked' : ''}" onclick="toggleTop3(${t.id})"></div>
-    </div>
-  `).join('');
-}
-
-function toggleTop3(id) {
-  toggleTask(id);
-  renderToday();
-  updateStats();
-}
-
-function openTop3Modal() {
-  const listEl = document.getElementById('modal-top3-list');
-  const available = state.tasks.filter(t => !t.done);
-  if (available.length === 0) {
-    listEl.innerHTML = `<div class="empty-state"><div class="empty-text">Нет задач. Сначала добавь через Сбор.</div></div>`;
-  } else {
-    listEl.innerHTML = available.map(t => `
-      <div class="task-item" onclick="toggleTop3Select(${t.id}, this)" style="cursor:pointer">
-        <div class="task-check ${state.top3.includes(t.id) ? 'done' : ''}" id="top3sel-${t.id}"></div>
-        <div class="task-body">
-          <div class="task-text">${t.text}</div>
-          <span class="task-bucket ${bucketClass(t.bucket)}">${bucketLabel(t.bucket)}</span>
-        </div>
-      </div>
-    `).join('');
-  }
-  document.getElementById('modal-top3').classList.add('open');
-}
-
-function toggleTop3Select(id, el) {
-  const idx = state.top3.indexOf(id);
-  if (idx >= 0) {
-    state.top3.splice(idx, 1);
-    el.querySelector('.task-check').classList.remove('done');
-  } else {
-    if (state.top3.length >= 3) { alert('Максимум 3 задачи!'); return; }
-    state.top3.push(id);
-    el.querySelector('.task-check').classList.add('done');
-  }
-  save();
-}
-
-// ═══════════ COLLECT SCREEN ═══════════
-let recentlyAdded = [];
-
-function renderCollect() {
-  renderRecentList();
-}
-
-function setTrigger(prefix) {
-  const inp = document.getElementById('collect-input');
-  inp.value = prefix;
-  inp.focus();
-}
-
-function quickAdd(bucket) {
-  const inp = document.getElementById('collect-input');
-  const text = inp.value.trim();
-  if (!text) return;
-  const task = addTask(text, bucket);
-  if (task) recentlyAdded.unshift(task.id);
-  inp.value = '';
-  inp.focus();
-  renderRecentList();
-  updateStats();
-}
-
-function renderRecentList() {
-  const list = document.getElementById('unsorted-list');
-  const recent = recentlyAdded.map(id => state.tasks.find(t => t.id === id)).filter(Boolean).slice(0,10);
-  if (recent.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">✏️</div><div class="empty-text">Пиши всё подряд,<br>не фильтруй</div></div>`;
-    return;
-  }
-  list.innerHTML = recent.map(t => `
-    <div class="task-item">
-      <div class="task-body">
-        <div class="task-text">${t.text}</div>
-        <span class="task-bucket ${bucketClass(t.bucket)}">${bucketLabel(t.bucket)}</span>
-      </div>
-      <button class="task-delete" onclick="deleteRecentTask(${t.id})">×</button>
-    </div>
-  `).join('');
-}
-
-function deleteRecentTask(id) {
-  deleteTask(id);
-  recentlyAdded = recentlyAdded.filter(i => i !== id);
-  renderRecentList();
-  updateStats();
-}
-
-// ═══════════ SORT SCREEN ═══════════
-function renderSort() {
-  ['deadline','next','waiting','someday'].forEach(bucket => {
-    const tasks = state.tasks.filter(t => t.bucket === bucket);
-    const el = document.getElementById('bucket-' + bucket);
-    if (tasks.length === 0) {
-      el.innerHTML = `<div class="empty-state" style="padding:12px 0"><div class="empty-text" style="font-size:13px">Пусто</div></div>`;
-      return;
-    }
-    el.innerHTML = tasks.map(t => `
-      <div class="task-item">
-        <div class="task-check ${t.done ? 'done' : ''}" onclick="toggleAndRender(${t.id})"></div>
-        <div class="task-body">
-          <div class="task-text ${t.done ? 'done' : ''}">${t.text}</div>
-        </div>
-        <button class="task-delete" onclick="deleteAndRender(${t.id})">×</button>
-      </div>
-    `).join('');
+// ═══════════════════════════════════════
+// TODAY
+// ═══════════════════════════════════════
+let activeTab = 'top3';
+function switchTab(tab){
+  activeTab = tab;
+  ['top3','today','inwork'].forEach(t=>{
+    document.getElementById('tab-'+t)?.classList.toggle('on', t===tab);
   });
+  renderActContent();
 }
 
-function toggleAndRender(id) { toggleTask(id); renderSort(); updateStats(); }
-function deleteAndRender(id) { deleteTask(id); renderSort(); updateStats(); }
-
-// ═══════════ MODAL ═══════════
-let selectedBucket = 'next';
-
-function openAddModal() {
-  selectedBucket = 'next';
-  document.getElementById('modal-task-text').value = '';
-  document.querySelectorAll('.bucket-opt').forEach(b => b.className = 'bucket-opt');
-  document.querySelector('[data-bucket="next"]').className = 'bucket-opt selected-next';
-  document.getElementById('modal-add').classList.add('open');
-  setTimeout(() => document.getElementById('modal-task-text').focus(), 100);
+function renderActContent(){
+  const el = document.getElementById('act-content'); if(!el) return;
+  if(activeTab==='top3') renderTop3(el);
+  else if(activeTab==='today') renderTodayTasks(el);
+  else renderInWork(el);
 }
 
-function selectBucket(b) {
-  selectedBucket = b;
-  document.querySelectorAll('.bucket-opt').forEach(btn => btn.className = 'bucket-opt');
-  document.querySelector(`[data-bucket="${b}"]`).className = `bucket-opt selected-${b}`;
+function renderTop3(el){
+  const tasks = S.top3.map(id=>S.tasks.find(t=>t.id===id)).filter(Boolean);
+  if(!tasks.length){
+    el.innerHTML=`<div class="empty"><div class="empty-i">🎯</div><div class="empty-t">Нажми «Выбрать главные» — выбери до 3 задач на сегодня</div></div>`; return;
+  }
+  el.innerHTML = tasks.map((t,i)=>`
+    <div class="act-task-item ${urgCls(t)}">
+      <div style="font-size:22px;font-weight:800;color:var(--accent);opacity:${t.done?.3:1};width:26px;flex-shrink:0;margin-top:2px">${i+1}</div>
+      <div style="flex:1">
+        <div class="ttxt ${t.done?'done':''}">${t.text}</div>
+        ${t.deadline?`<div class="tmeta"><span class="dl-tag ${dlCls(t.deadline)}">${dlLabel(t.deadline)}</span></div>`:''}
+      </div>
+      <div class="t3c ${t.done?'on':''}" onclick="toggleTask('${t.id}');renderToday()"></div>
+    </div>`).join('');
 }
 
-function addTaskFromModal() {
-  const text = document.getElementById('modal-task-text').value;
-  addTask(text, selectedBucket);
-  closeModal('modal-add');
+function renderTodayTasks(el){
+  // deadline tasks due today/overdue + top3
+  const todayTasks = S.tasks.filter(t=>!t.done && t.bucket==='deadline' && t.deadline && dlDays(t.deadline)<=0);
+  const top3Active = S.top3.map(id=>S.tasks.find(t=>t.id===id&&!t.done)).filter(Boolean);
+  const combined = [...new Map([...todayTasks,...top3Active].map(t=>[t.id,t])).values()];
+  if(!combined.length){ el.innerHTML=`<div class="empty"><div class="empty-t" style="font-size:13px">Нет задач на сегодня</div></div>`; return; }
+  el.innerHTML = combined.map(t=>`
+    <div class="act-task-item ${urgCls(t)}">
+      <div class="tchk ${t.done?'on':''}" onclick="toggleTask('${t.id}');renderToday()"></div>
+      <div class="tbody">
+        <div class="ttxt ${t.done?'done':''}">${t.text}</div>
+        ${t.deadline?`<div class="tmeta"><span class="dl-tag ${dlCls(t.deadline)}">${dlLabel(t.deadline)}</span></div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function renderInWork(el){
+  // all non-done sorted tasks (deadline+next+waiting+projects)
+  const active = S.tasks.filter(t=>!t.done && ['deadline','next','waiting'].includes(t.bucket));
+  const projTasks = (S.projects||[]).flatMap(p=>p.subtasks.filter(s=>!s.done).map(s=>({...s,_proj:p.name,_projId:p.id})));
+  if(!active.length && !projTasks.length){ el.innerHTML=`<div class="empty"><div class="empty-t" style="font-size:13px">Нет активных задач</div></div>`; return; }
+  el.innerHTML = [
+    ...active.map(t=>{
+      const b=BUCKETS[t.bucket];
+      return `<div class="act-task-item ${urgCls(t)}">
+        <div class="tchk ${t.done?'on':''}" onclick="toggleTask('${t.id}');renderToday()"></div>
+        <div class="tbody">
+          <div class="ttxt ${t.done?'done':''}">${t.text}</div>
+          <div class="tmeta">${b?`<span class="tag ${b.cls}">${b.icon} ${b.name}</span>`:''} ${t.deadline?`<span class="dl-tag ${dlCls(t.deadline)}">${dlLabel(t.deadline)}</span>`:''}</div>
+        </div>
+      </div>`;
+    }),
+    ...projTasks.map(s=>`<div class="act-task-item">
+      <div class="sub-chk ${s.done?'on':''}" onclick="toggleSub('${s._projId}','${s.id}');renderToday()" style="flex-shrink:0;margin-top:2px"></div>
+      <div class="tbody">
+        <div class="ttxt">${s.text}</div>
+        <div class="tmeta"><span class="tag tg-pr">📂 ${s._proj}</span></div>
+      </div>
+    </div>`)
+  ].join('');
+}
+
+function renderToday(){
+  const d=new Date();
+  document.getElementById('today-date').textContent=`${d.getDate()} ${MONTHS[d.getMonth()]}, ${DAYS[d.getDay()]}`;
+  const total=S.tasks.length, done=S.tasks.filter(t=>t.done).length;
+  const unsorted=S.tasks.filter(t=>t.bucket==='unsorted').length;
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-unsorted').textContent=unsorted;
+  const pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('prog').style.width=pct+'%';
+  document.getElementById('prog-lbl').textContent=total>0?`${done} из ${total} задач · ${pct}%`:'Нет задач — начни со сбора';
+
+  // streak badge
+  const sb=document.getElementById('streak-badge');
+  if((S.streak||0)>0){ sb.style.display='flex'; document.getElementById('streak-num').textContent=`🔥 ${S.streak}`; }
+  else sb.style.display='none';
+
+  // unsorted alert
+  const ua=document.getElementById('unsorted-alert');
+  const uc=document.getElementById('unsorted-alert-count');
+  if(ua){ ua.style.display=unsorted>0?'flex':'none'; if(uc) uc.textContent=`${unsorted} задач ждут сортировки — они могут быть важными`; }
+
+  // unsorted dot on nav
+  const dot=document.getElementById('unsorted-dot');
+  if(dot) dot.style.display=unsorted>0?'block':'none';
+
+  renderActContent(); renderRec(); renderUrgentDl(); renderXP(); renderAch();
+  renderTip('today','tip-today'); checkReminder();
+}
+
+function openTop3Modal(){
+  const available=S.tasks.filter(t=>!t.done&&t.bucket!=='unsorted');
+  const el=document.getElementById('mo-top3-list');
+  if(!available.length){ el.innerHTML=`<div class="empty"><div class="empty-t">Нет задач. Добавь через Сбор.</div></div>`; }
+  else el.innerHTML=available.map(t=>{
+    const b=BUCKETS[t.bucket], sel=S.top3.includes(t.id);
+    return `<div class="t3si" onclick="toggleTop3Sel('${t.id}',this)">
+      <div class="t3sc ${sel?'on':''}" id="t3s-${t.id}"></div>
+      <div class="tbody"><div class="ttxt">${t.text}</div>${b?`<span class="tag ${b.cls}">${b.icon} ${b.name}</span>`:''}</div>
+    </div>`;
+  }).join('');
+  openMo('mo-top3');
+}
+function toggleTop3Sel(id){
+  const idx=S.top3.indexOf(id);
+  if(idx>=0){ S.top3.splice(idx,1); document.getElementById('t3s-'+id)?.classList.remove('on'); }
+  else{ if(S.top3.length>=3){ showToast('Максимум 3 задачи!'); return; } S.top3.push(id); document.getElementById('t3s-'+id)?.classList.add('on'); }
+  save();
+}
+
+// RECURRING
+function renderRec(){
+  const el=document.getElementById('rec-list'), key=todayKey();
+  if(!S.recurring||!S.recurring.length){ el.innerHTML=`<div class="empty" style="padding:12px 0"><div class="empty-t" style="font-size:13px">Нажми «+ добавить»</div></div>`; return; }
+  el.innerHTML=S.recurring.map(r=>{ const done=((S.recurringDone||{})[key]||[]).includes(r.id);
+    return `<div class="rci"><div class="rcchk ${done?'on':''}" onclick="toggleRec('${r.id}')"></div>
+      <div class="rctxt ${done?'done':''}">${r.text}</div>
+      <span class="tag tg-rc">🔄</span>
+      <button style="background:none;border:none;color:var(--t3);font-size:16px;cursor:pointer" onclick="delRec('${r.id}')">×</button>
+    </div>`;
+  }).join('');
+}
+function toggleRec(id){
+  const key=todayKey(); if(!S.recurringDone) S.recurringDone={};
+  if(!S.recurringDone[key]) S.recurringDone[key]=[];
+  const idx=S.recurringDone[key].indexOf(id);
+  if(idx>=0) S.recurringDone[key].splice(idx,1);
+  else{ S.recurringDone[key].push(id); addXP(5,'привычка'); }
+  save(); renderRec(); checkAch();
+}
+function delRec(id){ S.recurring=S.recurring.filter(r=>r.id!==id); save(); renderRec(); }
+function openRecModal(){ document.getElementById('rec-inp').value=''; openMo('mo-rec'); setTimeout(()=>document.getElementById('rec-inp').focus(),100); }
+function addRec(){
+  const v=document.getElementById('rec-inp').value.trim(); if(!v) return;
+  S.recurring.push({id:uid(),text:v}); save(); closeMo('mo-rec'); renderRec();
+}
+
+// URGENT DEADLINES
+function dlDays(s){ if(!s) return null; const t=new Date(); t.setHours(0,0,0,0); const d=new Date(s); d.setHours(0,0,0,0); return Math.round((d-t)/86400000); }
+function dlLabel(s){ const n=dlDays(s); if(n===null) return ''; if(n<0) return `просрочено ${Math.abs(n)}д.`; if(n===0) return 'сегодня!'; if(n===1) return 'завтра'; return `через ${n}д.`; }
+function dlCls(s){ const n=dlDays(s); if(n===null) return 'dl-ok'; if(n<0) return 'dl-ov'; if(n===0) return 'dl-td'; if(n<=3) return 'dl-sn'; return 'dl-ok'; }
+function urgCls(t){ if(t.bucket!=='deadline'||!t.deadline||t.done) return ''; const n=dlDays(t.deadline); if(n<0||n===0) return 'urgent'; if(n<=3) return 'soon'; return ''; }
+
+function renderUrgentDl(){
+  const urgent=S.tasks.filter(t=>t.bucket==='deadline'&&!t.done&&t.deadline&&dlDays(t.deadline)<=3)
+    .sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
+  const card=document.getElementById('dl-today-card'), list=document.getElementById('dl-today-list');
+  if(!urgent.length){ card.style.display='none'; return; }
+  card.style.display='block';
+  list.innerHTML=urgent.map(t=>`<div class="ti ${urgCls(t)}">
+    <div class="tchk ${t.done?'on':''}" onclick="toggleTask('${t.id}');renderToday()"></div>
+    <div class="tbody"><div class="ttxt ${t.done?'done':''}">${t.text}</div>
+      <div class="tmeta"><span class="dl-tag ${dlCls(t.deadline)}">${dlLabel(t.deadline)}</span></div>
+    </div></div>`).join('');
+}
+
+// ═══════════════════════════════════════
+// COLLECT
+// ═══════════════════════════════════════
+function renderCollect(){
+  renderTip('collect','tip-collect');
+  const uns=S.tasks.filter(t=>t.bucket==='unsorted');
+  document.getElementById('col-count').textContent=`Не разобрано — ${uns.length}`;
+  const el=document.getElementById('col-list');
+  if(!uns.length){ el.innerHTML=`<div class="empty"><div class="empty-i">✏️</div><div class="empty-t">Добавляй задачи — потом иди в Сортировку</div></div>`; return; }
+  el.innerHTML=uns.map(t=>`<div class="ti">
+    <div class="tbody"><div class="ttxt">${t.text}</div><div class="tmeta"><span class="tag tg-un">📋 Не разобрано</span></div></div>
+    <button class="tdel" onclick="delTask('${t.id}');renderCollect()">×</button>
+  </div>`).join('');
+}
+function setT(p){ const i=document.getElementById('col-inp'); i.value=p; i.focus(); }
+function colAdd(){
+  const i=document.getElementById('col-inp'), v=i.value.trim(); if(!v) return;
+  S.tasks.push({id:uid(),text:v,bucket:'unsorted',done:false,created:todayKey()});
+  save(); i.value=''; i.focus();
+  if(S.tasks.length===1) addXP(10,'первая задача!');
+  checkAch(); renderCollect(); updateStats();
+}
+document.getElementById('col-inp').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();colAdd();} });
+
+// ═══════════════════════════════════════
+// TASKS
+// ═══════════════════════════════════════
+function toggleTask(id){
+  const t=S.tasks.find(t=>t.id==id); if(!t) return;
+  t.done=!t.done; save();
+  if(t.done) addXP(S.top3.includes(t.id)?15:10, S.top3.includes(t.id)?'главная задача':'задача выполнена');
+  checkAch(); updateStats();
+}
+function delTask(id){ S.tasks=S.tasks.filter(t=>t.id!=id); S.top3=S.top3.filter(i=>i!=id); save(); updateStats(); }
+function moveTask(id,bucket){
+  const t=S.tasks.find(t=>t.id==id); if(t){ t.bucket=bucket; save(); }
+  closeMo('mo-move'); if(cur==='sort') renderBuckets(); updateStats();
+}
+function updateStats(){ if(cur==='today') renderToday(); }
+
+// ═══════════════════════════════════════
+// PROJECTS
+// ═══════════════════════════════════════
+// A project: {id, name, bucket, subtasks:[{id,text,done}], created, deadline?}
+function openNewProjectModal(fromWizard=false){
+  document.getElementById('mo-proj-title').textContent='Новый проект 📂';
+  document.getElementById('mo-proj-body').innerHTML=`
+    <div class="mlabel">Название проекта</div>
+    <input type="text" class="inp" id="pj-name" placeholder="Например: Запуск вайбкодинга" style="margin-bottom:12px">
+    <div class="mlabel">Первые подзадачи (по одной на строку)</div>
+    <textarea class="inp" id="pj-subs" placeholder="Посмотреть YouTube&#10;Написать план&#10;Запустить MVP" rows="4" style="margin-bottom:12px"></textarea>
+    <div class="mlabel">Корзина</div>
+    <div class="bcards" id="pj-bucket-cards">${Object.entries(BUCKETS).map(([k,b])=>`
+      <div class="bcard ${k==='next'?'sel-next':''}" data-bk="${k}" onclick="selPjBucket('${k}')">
+        <div class="bc-i">${b.icon}</div><div><div class="bc-n">${b.name}</div><div class="bc-d">${b.desc}</div></div>
+      </div>`).join('')}</div>
+    <button class="btn bp" onclick="saveNewProject(${fromWizard})">Создать проект</button>`;
+  openMo('mo-proj');
+  setTimeout(()=>document.getElementById('pj-name')?.focus(),100);
+}
+
+let _pjBucket='next';
+function selPjBucket(k){
+  _pjBucket=k;
+  document.querySelectorAll('#pj-bucket-cards .bcard').forEach(c=>{ c.className='bcard'; });
+  document.querySelector(`#pj-bucket-cards [data-bk="${k}"]`).className=`bcard sel-${k}`;
+}
+
+function saveNewProject(fromWizard=false){
+  const name=document.getElementById('pj-name')?.value.trim(); if(!name) return;
+  const subsRaw=document.getElementById('pj-subs')?.value||'';
+  const subtasks=subsRaw.split('\n').map(s=>s.trim()).filter(Boolean).map(t=>({id:uid(),text:t,done:false}));
+  const proj={id:uid(),name,bucket:_pjBucket,subtasks,created:todayKey()};
+  if(!S.projects) S.projects=[];
+  S.projects.push(proj); save();
+  addXP(20,'новый проект'); checkAch();
+  closeMo('mo-proj');
+  if(fromWizard){
+    // mark wizard task as project-linked and move on
+    if(wizTask){ const t=S.tasks.find(t=>t.id===wizTask.id); if(t){t.bucket='project';t.done=true;save();} }
+    nextWizTask();
+  } else renderBuckets();
+}
+
+function openAddSubtaskModal(projId){
+  const proj=S.projects.find(p=>p.id==projId); if(!proj) return;
+  document.getElementById('mo-proj-title').textContent=`📂 ${proj.name}`;
+  document.getElementById('mo-proj-body').innerHTML=`
+    <div class="mlabel">Добавить подзадачи</div>
+    <textarea class="inp" id="sub-inp" placeholder="Каждая подзадача с новой строки..." rows="4" style="margin-bottom:12px"></textarea>
+    <button class="btn bp" onclick="addSubtasks('${projId}')">Добавить</button>`;
+  openMo('mo-proj');
+  setTimeout(()=>document.getElementById('sub-inp')?.focus(),100);
+}
+
+function addSubtasks(projId){
+  const proj=S.projects.find(p=>p.id==projId); if(!proj) return;
+  const raw=document.getElementById('sub-inp')?.value||'';
+  raw.split('\n').map(s=>s.trim()).filter(Boolean).forEach(t=>proj.subtasks.push({id:uid(),text:t,done:false}));
+  save(); closeMo('mo-proj'); renderBuckets();
+}
+
+function toggleSub(projId,subId){
+  const proj=S.projects.find(p=>p.id==projId); if(!proj) return;
+  const sub=proj.subtasks.find(s=>s.id==subId); if(!sub) return;
+  sub.done=!sub.done; save();
+  if(sub.done) addXP(5,'подзадача выполнена');
+  renderBuckets();
+}
+
+function delSub(projId,subId){
+  const proj=S.projects.find(p=>p.id==projId); if(!proj) return;
+  proj.subtasks=proj.subtasks.filter(s=>s.id!=subId); save(); renderBuckets();
+}
+
+function delProject(id){ S.projects=S.projects.filter(p=>p.id!=id); save(); renderBuckets(); }
+
+function renderProjects(){
+  const el=document.getElementById('projects-section'); if(!el) return;
+  if(!S.projects||!S.projects.length){ el.innerHTML=''; return; }
+  el.innerHTML=S.projects.map(p=>{
+    const total=p.subtasks.length, done=p.subtasks.filter(s=>s.done).length;
+    const pct=total>0?Math.round(done/total*100):0;
+    const b=BUCKETS[p.bucket]||BUCKETS.next;
+    return `<div class="proj-card">
+      <div class="proj-header" onclick="toggleProj('${p.id}')">
+        <span class="proj-icon">📂</span>
+        <span class="proj-name">${p.name}</span>
+        <span class="proj-badge">${b.icon} ${b.name}</span>
+        <span class="proj-badge" style="background:rgba(52,211,153,.1);color:var(--green)">${done}/${total}</span>
+        <span class="proj-chevron" id="pc-${p.id}">›</span>
+      </div>
+      <div class="proj-body" id="pb-${p.id}">
+        <div class="proj-prog"><div class="proj-prog-fill" style="width:${pct}%"></div></div>
+        <div class="proj-prog-lbl">${pct}% выполнено</div>
+        <div class="proj-sub-list">
+          ${p.subtasks.map(s=>`<div class="sub-item">
+            <div class="sub-chk ${s.done?'on':''}" onclick="toggleSub('${p.id}','${s.id}')"></div>
+            <div class="sub-txt ${s.done?'done':''}">${s.text}</div>
+            <button class="sub-del" onclick="delSub('${p.id}','${s.id}')">×</button>
+          </div>`).join('')}
+          ${!p.subtasks.length?'<div style="font-size:13px;color:var(--t3);padding:8px 0">Нет подзадач</div>':''}
+        </div>
+        <div class="proj-add-row">
+          <button class="btn bs bsm" style="flex:1" onclick="openAddSubtaskModal('${p.id}')">+ Добавить подзадачи</button>
+          <button class="btn bs bsm" style="flex:0;padding:9px 12px" onclick="openMoveProjectModal('${p.id}')">⇄</button>
+          <button class="btn bs bsm" style="flex:0;padding:9px 12px;color:var(--red)" onclick="delProject('${p.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleProj(id){
+  const body=document.getElementById('pb-'+id), chev=document.getElementById('pc-'+id);
+  if(!body) return;
+  const open=body.classList.toggle('open');
+  if(chev) chev.classList.toggle('open',open);
+}
+
+function openMoveProjectModal(projId){
+  const proj=S.projects.find(p=>p.id==projId); if(!proj) return;
+  const cards=document.getElementById('mo-move-cards');
+  cards.innerHTML=Object.entries(BUCKETS).map(([k,b])=>`
+    <div class="bcard ${proj.bucket===k?'sel-'+k:''}" onclick="moveProjBucket('${projId}','${k}')">
+      <div class="bc-i">${b.icon}</div><div><div class="bc-n">${b.name}</div><div class="bc-d">${b.desc}</div></div>
+    </div>`).join('');
+  openMo('mo-move');
+}
+function moveProjBucket(projId,bucket){
+  const proj=S.projects.find(p=>p.id==projId); if(proj){proj.bucket=bucket;save();}
+  closeMo('mo-move'); renderBuckets();
+}
+
+// ═══════════════════════════════════════
+// SORT
+// ═══════════════════════════════════════
+function renderSort(){
+  const uns=S.tasks.filter(t=>t.bucket==='unsorted');
+  document.getElementById('sort-sub').textContent=uns.length>0?`${uns.length} задач ждут сортировки`:'Все задачи разобраны ✓';
+  if(uns.length>0) showWiz(); else showBkts();
+}
+function showWiz(){ document.getElementById('sort-wiz').classList.add('on'); document.getElementById('sort-bkts').classList.remove('on');
+  const uns=S.tasks.filter(t=>t.bucket==='unsorted');
+  if(!uns.length){showBkts();return;} wizTask=uns[0];
+  if(wizMode==='quick') showQuickSort(); else showQ1();
+}
+function showBkts(){ document.getElementById('sort-wiz').classList.remove('on'); document.getElementById('sort-bkts').classList.add('on'); renderBuckets(); }
+
+// BUCKET VIEW
+function renderBuckets(){
+  renderProjects();
+  // deadline
+  const dl=S.tasks.filter(t=>t.bucket==='deadline').sort((a,b)=>{if(!a.deadline)return 1;if(!b.deadline)return -1;return new Date(a.deadline)-new Date(b.deadline);});
+  const dlEl=document.getElementById('b-deadline');
+  dlEl.innerHTML=dl.length?dl.map(t=>{
+    const urg=urgCls(t), dlL=t.deadline?`<span class="dl-tag ${dlCls(t.deadline)}">${dlLabel(t.deadline)}</span>`:'';
+    return `<div class="ti ${urg}">
+      <div class="tchk ${t.done?'on':''}" onclick="toggleTask('${t.id}');renderBuckets()"></div>
+      <div class="tbody"><div class="ttxt ${t.done?'done':''}">${t.text}</div>
+        <div class="tmeta">${dlL}<button onclick="editDlDate('${t.id}')" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer">📅 дата</button></div>
+      </div>
+      <button class="tmove" onclick="openMoveModal('${t.id}')">⇄</button>
+      <button class="tdel" onclick="delTask('${t.id}');renderBuckets()">×</button>
+    </div>`;}).join(''):`<div class="empty" style="padding:10px 0"><div class="empty-t" style="font-size:13px">Пусто</div></div>`;
+
+  // next & waiting
+  ['next','waiting'].forEach(b=>{
+    const tasks=S.tasks.filter(t=>t.bucket===b);
+    document.getElementById('b-'+b).innerHTML=tasks.length?tasks.map(t=>`<div class="ti">
+      <div class="tchk ${t.done?'on':''}" onclick="toggleTask('${t.id}');renderBuckets()"></div>
+      <div class="tbody"><div class="ttxt ${t.done?'done':''}">${t.text}</div></div>
+      <button class="tmove" onclick="openMoveModal('${t.id}')">⇄</button>
+      <button class="tdel" onclick="delTask('${t.id}');renderBuckets()">×</button>
+    </div>`).join(''):`<div class="empty" style="padding:10px 0"><div class="empty-t" style="font-size:13px">Пусто</div></div>`;
+  });
+
+  // someday — with ACTIVATE button
+  const sd=S.tasks.filter(t=>t.bucket==='someday');
+  document.getElementById('b-someday').innerHTML=sd.length?sd.map(t=>`<div class="ti">
+    <div class="tchk ${t.done?'on':''}" onclick="toggleTask('${t.id}');renderBuckets()"></div>
+    <div class="tbody"><div class="ttxt ${t.done?'done':''}">${t.text}</div>
+      <div class="tmeta"><button class="sd-act" onclick="activateSomeday('${t.id}')">→ Активировать</button></div>
+    </div>
+    <button class="tdel" onclick="delTask('${t.id}');renderBuckets()">×</button>
+  </div>`).join(''):`<div class="empty" style="padding:10px 0"><div class="empty-t" style="font-size:13px">Пусто</div></div>`;
+}
+
+function activateSomeday(id){
+  const t=S.tasks.find(t=>t.id==id); if(!t) return;
+  t.bucket='unsorted'; save();
+  showToast('📋 Задача отправлена в Сбор для сортировки');
+  renderBuckets(); updateStats();
+}
+
+// ═══════════════════════════════════════
+// QUICK SORT MODE
+// ═══════════════════════════════════════
+let wizMode='guided'; // 'guided' | 'quick'
+function toggleWizMode(){
+  wizMode = wizMode==='guided'?'quick':'guided';
+  const btn=document.getElementById('wiz-mode-btn');
+  if(btn) btn.textContent = wizMode==='guided'?'⚡ Быстрый выбор':'🔍 С вопросами';
+  const uns=S.tasks.filter(t=>t.bucket==='unsorted');
+  if(!uns.length){showBkts();return;}
+  wizTask=uns[0];
+  if(wizMode==='quick') showQuickSort();
+  else showQ1();
+}
+
+function showQuickSort(){
+  if(!wizTask){showBkts();return;}
+  const left=S.tasks.filter(t=>t.bucket==='unsorted').length;
+  document.getElementById('wiz-content').innerHTML=`
+    <div class="qs-task-card">
+      <div style="font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📋 осталось ${left}</div>
+      <div class="qs-task-text">"${wizTask.text}"</div>
+      <div class="ctitle" style="margin-bottom:8px">Куда отправить?</div>
+      <div class="qs-strip">
+        <button class="qs-btn qs-dl" onclick="qs('deadline')">🔴 Дедлайн</button>
+        <button class="qs-btn qs-nx" onclick="qs('next')">🔵 Следующее</button>
+        <button class="qs-btn qs-wt" onclick="qs('waiting')">🟣 Ожидание</button>
+        <button class="qs-btn qs-sd" onclick="qs('someday')">⚪ Когда-нибудь</button>
+        <button class="qs-btn qs-pr" onclick="openNewProjectModal(true)">📂 Проект</button>
+        <button class="qs-btn" style="color:var(--red)" onclick="delTask(wizTask.id);nextQS()">🗑 Удалить</button>
+      </div>
+    </div>`;
+}
+
+function qs(bucket){
+  const t=S.tasks.find(t=>t.id===wizTask.id); if(t){t.bucket=bucket;save();}
+  nextQS();
+}
+
+function nextQS(){
   updateStats();
-  if (currentScreen === 'sort') renderSort();
+  const uns=S.tasks.filter(t=>t.bucket==='unsorted');
+  if(!uns.length){
+    document.getElementById('wiz-content').innerHTML=`<div class="bres" style="background:rgba(52,211,153,.08);border:1.5px solid rgba(52,211,153,.3)">
+      <div class="bres-icon">🎉</div><div class="bres-title" style="color:var(--green)">Все задачи разобраны!</div>
+      <div class="bres-desc">Хрустальная ясность — каждая задача знает своё место.</div>
+      <button class="btn bp" onclick="showBkts()">Посмотреть корзины →</button>
+    </div>`;
+    document.getElementById('sort-sub').textContent='Все задачи разобраны ✓'; return;
+  }
+  wizTask=uns[0];
+  document.getElementById('sort-sub').textContent=`${uns.length} задач ждут сортировки`;
+  showQuickSort();
 }
 
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function editDlDate(id){
+  const t=S.tasks.find(t=>t.id==id); if(!t) return;
+  const v=prompt('Дата дедлайна (ГГГГ-ММ-ДД):',t.deadline||new Date().toISOString().split('T')[0]);
+  if(v!==null){t.deadline=v||null;save();renderBuckets();renderUrgentDl();}
+}
 
-// ═══════════ REVIEW ═══════════
-function renderReview() {
-  const done = state.tasks.filter(t => t.done).length;
-  const pending = state.tasks.filter(t => !t.done).length;
-  document.getElementById('rev-done').textContent = done;
-  document.getElementById('rev-pending').textContent = pending;
+function openMoveModal(id){
+  const t=S.tasks.find(t=>t.id==id);
+  document.getElementById('mo-move-cards').innerHTML=Object.entries(BUCKETS).map(([k,b])=>`
+    <div class="bcard ${t&&t.bucket===k?'sel-'+k:''}" onclick="moveTask('${id}','${k}')">
+      <div class="bc-i">${b.icon}</div><div><div class="bc-n">${b.name}</div><div class="bc-d">${b.desc}</div><div class="bc-h">${b.hint}</div></div>
+    </div>`).join('');
+  openMo('mo-move');
+}
 
-  const today = new Date();
-  const grid = document.getElementById('week-grid');
-  grid.innerHTML = '';
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    const isToday = i === 0;
-    const hasDone = state.weekActivity[key];
-    const div = document.createElement('div');
-    div.className = `week-day ${hasDone ? 'done-day' : ''} ${isToday ? 'today-day' : ''}`;
-    div.innerHTML = `<div class="week-day-label">${DAYS[d.getDay()]}</div>${d.getDate()}`;
+// ═══════════════════════════════════════
+// WIZARD
+// ═══════════════════════════════════════
+let wizTask=null;
+function showQ1(){
+  const left=S.tasks.filter(t=>t.bucket==='unsorted').length;
+  document.getElementById('wiz-content').innerHTML=`<div class="qcard2">
+    <div class="qbadge">📋 осталось ${left}</div>
+    <div class="qprev">"${wizTask.text}"</div>
+    <div class="qtxt2">Эта задача вообще нужна?</div>
+    <div class="qhint">Если не сделать — что-то важное провалится? Или просто «было бы неплохо»?</div>
+    <div class="qopts">
+      <button class="qopt" onclick="showQ2()"><span class="qoi">✅</span><div class="qob"><div class="qol">Да, нужна</div><div class="qos">Продолжить разбор</div></div></button>
+      <button class="qopt" onclick="assignAndNext('someday')"><span class="qoi">📦</span><div class="qob"><div class="qol">Не сейчас / может быть</div><div class="qos">→ Когда-нибудь</div></div></button>
+      <button class="qopt" onclick="delTask(wizTask.id);renderSort()"><span class="qoi">🗑️</span><div class="qob"><div class="qol">Удалить</div><div class="qos">Это вообще не нужно</div></div></button>
+    </div></div>`;
+}
+function showQ2(){
+  document.getElementById('wiz-content').innerHTML=`<div class="qcard2">
+    <div class="qbadge">⚡ Быстрая проверка</div>
+    <div class="qprev">"${wizTask.text}"</div>
+    <div class="qtxt2">Займёт меньше 2 минут?</div>
+    <div class="qhint">Правило Focus4: если меньше 2 минут — делай прямо сейчас. Не записывай, не откладывай.</div>
+    <div class="qopts">
+      <button class="qopt" onclick="showResultNow()"><span class="qoi">⚡</span><div class="qob"><div class="qol">Меньше 2 минут</div><div class="qos">Сделаю сейчас</div></div></button>
+      <button class="qopt" onclick="showQ3()"><span class="qoi">📌</span><div class="qob"><div class="qol">Больше 2 минут</div><div class="qos">Нужно спланировать</div></div></button>
+    </div></div>`;
+}
+function showQ3(){
+  document.getElementById('wiz-content').innerHTML=`<div class="qcard2">
+    <div class="qbadge">🔍 Это проект?</div>
+    <div class="qprev">"${wizTask.text}"</div>
+    <div class="qtxt2">Это одно действие или несколько шагов?</div>
+    <div class="qhint">«Запустить вайбкодинг» — проект. «Посмотреть YouTube про вайбкодинг» — одно действие.</div>
+    <div class="qopts">
+      <button class="qopt" onclick="showQ4()"><span class="qoi">✏️</span><div class="qob"><div class="qol">Одно действие</div><div class="qos">Сделаю за один подход</div></div></button>
+      <button class="qopt" onclick="openNewProjectModal(true)"><span class="qoi">📂</span><div class="qob"><div class="qol">Это проект</div><div class="qos">Создам проект с подзадачами</div></div></button>
+    </div></div>`;
+}
+function showQ4(){
+  document.getElementById('wiz-content').innerHTML=`<div class="qcard2">
+    <div class="qbadge">📅 Дедлайн?</div>
+    <div class="qprev">"${wizTask.text}"</div>
+    <div class="qtxt2">Есть конкретная дата?</div>
+    <div class="qhint">Дедлайн — это не «скоро». Это конкретный день: «до пятницы», «1-го числа».</div>
+    <div class="qopts">
+      <button class="qopt" onclick="showDlPicker()"><span class="qoi">🔴</span><div class="qob"><div class="qol">Да, есть дата</div><div class="qos">→ С дедлайном</div></div></button>
+      <button class="qopt" onclick="showQ5()"><span class="qoi">❓</span><div class="qob"><div class="qol">Нет конкретной даты</div><div class="qos">Ещё один вопрос</div></div></button>
+    </div></div>`;
+}
+function showDlPicker(){
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('wiz-content').innerHTML=`<div class="qcard2">
+    <div class="qbadge">📅 Укажи дату</div>
+    <div class="qprev">"${wizTask.text}"</div>
+    <div class="qtxt2">До какого числа нужно сделать?</div>
+    <div class="qhint">Просроченные задачи будут гореть красным 🔴</div>
+    <input type="date" class="inp" id="dl-date-inp" value="${today}" min="${today}" style="margin-bottom:14px">
+    <div class="qopts">
+      <button class="qopt" onclick="assignDlAndNext()"><span class="qoi">✅</span><div class="qob"><div class="qol">Сохранить с этой датой</div></div></button>
+      <button class="qopt" onclick="assignAndNext('deadline')"><span class="qoi">📌</span><div class="qob"><div class="qol">Без даты</div><div class="qos">Просто в дедлайны</div></div></button>
+    </div></div>`;
+}
+function assignDlAndNext(){
+  const v=document.getElementById('dl-date-inp')?.value;
+  const t=S.tasks.find(t=>t.id===wizTask.id); if(t){t.bucket='deadline';t.deadline=v||null;save();}
+  showBucketResult('deadline',v?`до ${dlLabel(v)}`:'');
+}
+function showQ5(){
+  document.getElementById('wiz-content').innerHTML=`<div class="qcard2">
+    <div class="qbadge">👥 Кто делает?</div>
+    <div class="qprev">"${wizTask.text}"</div>
+    <div class="qtxt2">Ты делаешь сам — или ждёшь кого-то?</div>
+    <div class="qhint">«Ожидание» — ты уже передал задачу, мяч на стороне другого человека.</div>
+    <div class="qopts">
+      <button class="qopt" onclick="assignAndNext('next')"><span class="qoi">🔵</span><div class="qob"><div class="qol">Я делаю сам</div><div class="qos">→ Следующие действия</div></div></button>
+      <button class="qopt" onclick="assignAndNext('waiting')"><span class="qoi">🟣</span><div class="qob"><div class="qol">Жду другого</div><div class="qos">→ Ожидание</div></div></button>
+    </div></div>`;
+}
+function showResultNow(){
+  document.getElementById('wiz-content').innerHTML=`<div class="bres r-nw">
+    <div class="bres-icon">⚡</div>
+    <div class="bres-title" style="color:var(--green)">Сделай прямо сейчас!</div>
+    <div class="bres-task">"${wizTask.text}"</div>
+    <div class="bres-desc">Займёт меньше 2 минут — просто сделай.</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn bp" style="flex:1" onclick="markDoneWiz()">Сделал ✓</button>
+      <button class="btn bs" style="flex:1" onclick="assignAndNext('next')">Записать всё же</button>
+    </div></div>`;
+}
+function markDoneWiz(){
+  const t=S.tasks.find(t=>t.id===wizTask.id); if(t){t.bucket='next';t.done=true;save();} nextWizTask();
+}
+function assignAndNext(bucket){
+  const t=S.tasks.find(t=>t.id===wizTask.id); if(t){t.bucket=bucket;save();}
+  showBucketResult(bucket,'');
+}
+function showBucketResult(bucket,extra){
+  const b=BUCKETS[bucket];
+  document.getElementById('wiz-content').innerHTML=`<div class="bres r-${bucket.substring(0,2)}">
+    <div class="bres-icon">${b.icon}</div>
+    <div class="bres-title" style="color:${b.col}">${b.name}${extra?' — '+extra:''}</div>
+    <div class="bres-task">"${wizTask.text}"</div>
+    <div class="bres-desc">${b.desc}</div>
+    <div class="qhint">${b.hint}</div>
+    <button class="btn bp" onclick="nextWizTask()">Следующая →</button>
+  </div>`;
+  updateStats();
+}
+function nextWizTask(){
+  const uns=S.tasks.filter(t=>t.bucket==='unsorted');
+  if(!uns.length){
+    document.getElementById('wiz-content').innerHTML=`<div class="bres" style="background:rgba(52,211,153,.08);border:1.5px solid rgba(52,211,153,.3)">
+      <div class="bres-icon">🎉</div>
+      <div class="bres-title" style="color:var(--green)">Все задачи разобраны!</div>
+      <div class="bres-desc">Хрустальная ясность — каждая задача знает своё место.</div>
+      <button class="btn bp" onclick="showBkts()">Посмотреть корзины →</button>
+    </div>`;
+    document.getElementById('sort-sub').textContent='Все задачи разобраны ✓';
+    return;
+  }
+  wizTask=uns[0];
+  document.getElementById('sort-sub').textContent=`${uns.length} задач ждут сортировки`;
+  showQ1();
+}
+
+// ═══════════════════════════════════════
+// REVIEW
+// ═══════════════════════════════════════
+function renderReview(){
+  renderQuote(); renderTip('review','tip-review');
+  const done=S.tasks.filter(t=>t.done).length, left=S.tasks.filter(t=>!t.done).length;
+  document.getElementById('rv-done').textContent=done;
+  document.getElementById('rv-left').textContent=left;
+  const today=new Date(), grid=document.getElementById('week-grid'); grid.innerHTML='';
+  for(let i=6;i>=0;i--){
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const div=document.createElement('div');
+    div.className=`wday ${S.weekAct[key]?'done':''} ${i===0?'today':''}`;
+    div.innerHTML=`<div class="wdlbl">${DAYS[d.getDay()]}</div>${d.getDate()}`;
     grid.appendChild(div);
   }
-
-  const saved = state.reviews[todayKey()] || {};
-  document.getElementById('rev-good').value = saved.good || '';
-  document.getElementById('rev-improve').value = saved.improve || '';
-  document.getElementById('rev-tomorrow').value = saved.tomorrow || '';
+  const sv=S.reviews[todayKey()]||{};
+  document.getElementById('rv-good').value=sv.good||'';
+  document.getElementById('rv-improve').value=sv.improve||'';
+  document.getElementById('rv-tomorrow').value=sv.tomorrow||'';
+}
+function saveReview(){
+  const key=todayKey();
+  S.reviews[key]={good:document.getElementById('rv-good').value,improve:document.getElementById('rv-improve').value,tomorrow:document.getElementById('rv-tomorrow').value};
+  S.weekAct[key]=true;
+  if(S.lastReview!==key){ S.streak=(S.streak||0)+1; S.lastReview=key; addXP(25,'обзор дня'); if(S.streak===7) addXP(50,'7 дней подряд! 🔥'); }
+  save(); checkAch(); navigate('today');
 }
 
-function saveReview() {
-  const key = todayKey();
-  state.reviews[key] = {
-    good: document.getElementById('rev-good').value,
-    improve: document.getElementById('rev-improve').value,
-    tomorrow: document.getElementById('rev-tomorrow').value
-  };
-  state.weekActivity[key] = true;
+// ═══════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════
+function openMo(id){ document.getElementById(id).classList.add('open'); }
+function closeMo(id){ document.getElementById(id).classList.remove('open'); }
 
-  if (state.lastReviewDate !== key) {
-    state.streak = (state.streak || 0) + 1;
-    state.lastReviewDate = key;
-  }
-  save();
-  navigate('today');
-}
-
-// ═══════════ STATS ═══════════
-function updateStats() {
-  if (currentScreen === 'today') renderToday();
-}
-
-// ═══════════ COLLECT INPUT ENTER ═══════════
-document.getElementById('collect-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    quickAdd('next');
-  }
-});
-
-// ═══════════ INIT ═══════════
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
 load();
+if(!S.recurring) S.recurring=[];
+if(!S.recurringDone) S.recurringDone={};
+if(!S.xp) S.xp=0;
+if(!S.unlocked) S.unlocked=[];
+if(!S.projects) S.projects=[];
+_pjBucket='next';
+document.getElementById('rec-inp').addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();addRec();} });
+checkReminder(); setInterval(checkReminder,60000);
 navigate('today');
 </script>
 </body>
