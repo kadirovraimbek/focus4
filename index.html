@@ -326,46 +326,42 @@ input[type=date].inp{color-scheme:dark}
     </div>
   </div>
   <div class="scroll">
+
+    <!-- Reminder (compact, only after 22:00) -->
     <div class="rrem" id="rrem">
       <div class="rrem-icon">🌙</div>
       <div style="flex:1">
         <div class="rrem-title">Время обзора дня!</div>
-        <div class="rrem-sub">22:00 — закрой день по системе. Займёт 5 минут.</div>
+        <div class="rrem-sub">5 минут чтобы закрыть день.</div>
         <div class="rrem-btns">
-          <button class="rrem-btn rrem-p" onclick="navigate('review')">Начать обзор →</button>
-          <button class="rrem-btn rrem-s" onclick="addToCalendar()">📅 В календарь</button>
+          <button class="rrem-btn rrem-p" onclick="navigate('review')">Начать →</button>
+          <button class="rrem-btn rrem-s" onclick="addToCalendar()">📅 Напомнить</button>
         </div>
       </div>
     </div>
-    <div class="xpwrap">
-      <div class="xptop"><div class="xplv" id="xp-lv">Уровень 1 — Новичок</div><div class="xppt" id="xp-pt">0 XP</div></div>
+
+    <!-- XP bar — compact -->
+    <div style="background:var(--surface);border-radius:14px;padding:12px 14px;margin-bottom:12px;border:1px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:700;color:var(--accent)" id="xp-lv">Уровень 1 — Новичок</div>
+        <div style="font-size:12px;color:var(--t2)" id="xp-pt">0 XP</div>
+      </div>
       <div class="xptrack"><div class="xpbar" id="xp-bar" style="width:0%"></div></div>
-      <div class="xpnxt" id="xp-nxt">До следующего уровня: 100 XP</div>
+      <div style="font-size:11px;color:var(--t3);margin-top:4px" id="xp-nxt"></div>
     </div>
-    <div class="srow">
-      <div class="schip"><div class="snum" id="s-total">0</div><div class="slbl">всего</div></div>
-      <div class="schip"><div class="snum" id="s-done">0</div><div class="slbl">готово</div></div>
-      <div class="schip"><div class="snum" id="s-unsorted" style="color:var(--amber)">0</div><div class="slbl" style="color:var(--amber)">не разобрано</div></div>
-    </div>
-    <div class="pwrap"><div class="pfill" id="prog" style="width:0%"></div></div>
-    <div class="plbl" id="prog-lbl"></div>
-    <div class="tip" id="tip-today"></div>
 
     <!-- UNSORTED ALERT -->
-    <div id="unsorted-alert" style="display:none;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:14px;padding:12px 14px;margin-bottom:12px;display:none;align-items:center;gap:10px">
-      <span style="font-size:20px">⚠️</span>
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:700;color:var(--amber)">Есть несортированные задачи</div>
-        <div style="font-size:12px;color:var(--t2);margin-top:2px" id="unsorted-alert-count"></div>
-      </div>
-      <button onclick="navigate('sort')" style="background:var(--amber);color:#000;border:none;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Разобрать →</button>
+    <div id="unsorted-alert" style="display:none;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:14px;padding:12px 14px;margin-bottom:12px;align-items:center;gap:10px">
+      <span style="font-size:18px">⚠️</span>
+      <div style="flex:1;font-size:13px;font-weight:600;color:var(--amber)" id="unsorted-alert-count"></div>
+      <button onclick="navigate('sort')" style="background:var(--amber);color:#000;border:none;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Разобрать →</button>
     </div>
 
-    <!-- ACTIVE TASKS -->
+    <!-- ACTIVE TASKS — main block -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div class="ctitle" style="margin-bottom:0">Актуальные задачи</div>
-        <button onclick="openTop3Modal()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer">Выбрать главные</button>
+        <button onclick="openTop3Modal()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer">+ выбрать</button>
       </div>
       <div class="act-tab-row">
         <button class="act-tab on" id="tab-top3" onclick="switchTab('top3')">🎯 Главные</button>
@@ -375,36 +371,21 @@ input[type=date].inp{color-scheme:dark}
       <div id="act-content"></div>
     </div>
 
+    <!-- RECURRING -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div class="ctitle" style="margin-bottom:0">🔄 Ежедневные привычки</div>
+        <div class="ctitle" style="margin-bottom:0">🔄 Привычки</div>
         <button onclick="openRecModal()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer">+ добавить</button>
       </div>
       <div id="rec-list"></div>
     </div>
+
+    <!-- BURNING DEADLINES — only when urgent -->
     <div class="card" id="dl-today-card" style="display:none">
       <div class="ctitle">🔴 Горящие дедлайны</div>
       <div id="dl-today-list"></div>
     </div>
-    <div class="card">
-      <div class="ctitle">Достижения</div>
-      <div class="achrow" id="ach-row"></div>
-    </div>
-    <div class="card">
-      <div class="ctitle">Навигация</div>
-      <div class="spill" onclick="navigate('collect')">
-        <div class="snum s1">1</div><div class="si"><div class="sn">Сбор</div><div class="sd">Выгрузить задачи из головы</div></div>
-        <span style="color:var(--t3);font-size:20px">›</span>
-      </div>
-      <div class="spill" onclick="navigate('sort')">
-        <div class="snum s2">2</div><div class="si"><div class="sn">Сортировка</div><div class="sd">Разложить по корзинам</div></div>
-        <span style="color:var(--t3);font-size:20px">›</span>
-      </div>
-      <div class="spill" onclick="navigate('review')">
-        <div class="snum s4">4</div><div class="si"><div class="sn">Обзор дня</div><div class="sd">Закрыть день</div></div>
-        <span style="color:var(--t3);font-size:20px">›</span>
-      </div>
-    </div>
+
   </div>
 </div>
 
@@ -483,13 +464,20 @@ input[type=date].inp{color-scheme:dark}
   <div class="scroll">
     <div class="qcard" id="rev-quote"></div>
     <div class="tip" id="tip-review"></div>
+
+    <!-- Stats (moved from today) -->
+    <div class="srow">
+      <div class="schip"><div class="snum" id="s-total">0</div><div class="slbl">всего задач</div></div>
+      <div class="schip"><div class="snum" id="s-done">0</div><div class="slbl">готово</div></div>
+      <div class="schip"><div class="snum" id="s-unsorted" style="color:var(--amber)">0</div><div class="slbl" style="color:var(--amber)">не разобрано</div></div>
+    </div>
+
     <div class="card">
-      <div class="ctitle">Итоги дня</div>
-      <div class="srow" style="margin-bottom:0">
-        <div class="schip"><div class="snum" id="rv-done">0</div><div class="slbl">выполнено</div></div>
-        <div class="schip"><div class="snum" id="rv-left">0</div><div class="slbl">осталось</div></div>
-      </div>
-      <div class="ctitle" style="margin-top:16px;margin-bottom:8px">Неделя</div>
+      <div class="ctitle">Достижения</div>
+      <div class="achrow" id="ach-row"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle" style="margin-bottom:8px">Активность недели</div>
       <div class="wgrid" id="week-grid"></div>
     </div>
     <div class="card">
@@ -797,14 +785,6 @@ function renderInWork(el){
 function renderToday(){
   const d=new Date();
   document.getElementById('today-date').textContent=`${d.getDate()} ${MONTHS[d.getMonth()]}, ${DAYS[d.getDay()]}`;
-  const total=S.tasks.length, done=S.tasks.filter(t=>t.done).length;
-  const unsorted=S.tasks.filter(t=>t.bucket==='unsorted').length;
-  document.getElementById('s-total').textContent=total;
-  document.getElementById('s-done').textContent=done;
-  document.getElementById('s-unsorted').textContent=unsorted;
-  const pct=total>0?Math.round(done/total*100):0;
-  document.getElementById('prog').style.width=pct+'%';
-  document.getElementById('prog-lbl').textContent=total>0?`${done} из ${total} задач · ${pct}%`:'Нет задач — начни со сбора';
 
   // streak badge
   const sb=document.getElementById('streak-badge');
@@ -812,15 +792,14 @@ function renderToday(){
   else sb.style.display='none';
 
   // unsorted alert
+  const unsorted=S.tasks.filter(t=>t.bucket==='unsorted').length;
   const ua=document.getElementById('unsorted-alert');
   const uc=document.getElementById('unsorted-alert-count');
-  if(ua){ ua.style.display=unsorted>0?'flex':'none'; if(uc) uc.textContent=`${unsorted} задач ждут сортировки — они могут быть важными`; }
-
-  // unsorted dot on nav
+  if(ua){ ua.style.display=unsorted>0?'flex':'none'; if(uc) uc.textContent=`${unsorted} задач не разобрано`; }
   const dot=document.getElementById('unsorted-dot');
   if(dot) dot.style.display=unsorted>0?'block':'none';
 
-  renderActContent(); renderRec(); renderUrgentDl(); renderXP(); renderAch();
+  renderActContent(); renderRec(); renderUrgentDl(); renderXP();
   renderTip('today','tip-today'); checkReminder();
 }
 
@@ -1326,9 +1305,12 @@ function nextWizTask(){
 // ═══════════════════════════════════════
 function renderReview(){
   renderQuote(); renderTip('review','tip-review');
-  const done=S.tasks.filter(t=>t.done).length, left=S.tasks.filter(t=>!t.done).length;
-  document.getElementById('rv-done').textContent=done;
-  document.getElementById('rv-left').textContent=left;
+  // stats
+  const total=S.tasks.length, done=S.tasks.filter(t=>t.done).length, unsorted=S.tasks.filter(t=>t.bucket==='unsorted').length;
+  const stEl=document.getElementById('s-total'); if(stEl) stEl.textContent=total;
+  const sdEl=document.getElementById('s-done'); if(sdEl) sdEl.textContent=done;
+  const suEl=document.getElementById('s-unsorted'); if(suEl) suEl.textContent=unsorted;
+  renderAch();
   const today=new Date(), grid=document.getElementById('week-grid'); grid.innerHTML='';
   for(let i=6;i>=0;i--){
     const d=new Date(today); d.setDate(today.getDate()-i);
