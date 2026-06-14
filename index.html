@@ -439,7 +439,7 @@ input[type=date].inp{color-scheme:dark}
       <!-- PROJECTS section -->
       <div id="projects-section"></div>
       <div class="card">
-        <div class="ctitle">🔵 Следующие действия</div>
+        <div class="ctitle">🔵 В работе</div>
         <div id="b-next"></div>
       </div>
       <div class="card">
@@ -560,7 +560,7 @@ const MONTHS = ['января','февраля','марта','апреля','м�
 
 const BUCKETS = {
   deadline:{ icon:'🔴', name:'С дедлайном', desc:'Конкретная дата — провалится, если не сделать вовремя.', hint:'«Сдать отчёт до пятницы», «Оплатить до 1-го»', cls:'tg-dl', col:'var(--accent)' },
-  next:    { icon:'🔵', name:'Следующие действия', desc:'Конкретный шаг — можно сделать прямо сейчас.', hint:'«Позвонить в банк», «Написать первый абзац»', cls:'tg-nx', col:'var(--blue)' },
+  next:    { icon:'🔵', name:'В работе', desc:'Задачи которые ты сейчас делаешь — конкретный шаг, можно взять и выполнить.', hint:'«Позвонить в банк», «Написать первый абзац», «Отправить файл»', cls:'tg-nx', col:'var(--blue)' },
   waiting: { icon:'🟣', name:'Ожидание', desc:'Ты сделал своё — ждёшь другого человека.', hint:'«Жду ответа от клиента», «Ждём дизайн»', cls:'tg-wt', col:'var(--purple)' },
   someday: { icon:'⚪', name:'Когда-нибудь', desc:'Идеи без срока. Можно активировать в любой момент.', hint:'«Научиться гитаре», «Съездить в Грузию»', cls:'tg-sd', col:'var(--t2)' }
 };
@@ -617,7 +617,7 @@ const ACHS=[
   {id:'streak3',     icon:'🔥', name:'3 дня подряд', check:s=>(s.streak||0)>=3},
   {id:'streak7',     icon:'⚡', name:'Неделя!',       check:s=>(s.streak||0)>=7},
   {id:'tasks10',     icon:'💪', name:'10 задач',      check:s=>s.tasks.filter(t=>t.done).length>=10},
-  {id:'top3done',    icon:'🎯', name:'Фокус дня',     check:s=>s.top3.length===3&&s.top3.every(id=>s.tasks.find(t=>t.id===id&&t.done))},
+  {id:'top3done',    icon:'🎯', name:'Фокус дня',     check:s=>s.top3.length===3&&s.top3.every(id=>s.tasks.find(t=>t.id==id&&t.done))},
 ];
 function checkAch(){
   if(!S.unlocked) S.unlocked=[];
@@ -725,9 +725,9 @@ function renderActContent(){
 }
 
 function renderTop3(el){
-  const tasks = S.top3.map(id=>S.tasks.find(t=>t.id===id)).filter(Boolean);
+  const tasks = S.top3.map(id=>S.tasks.find(t=>t.id==id)).filter(Boolean);
   if(!tasks.length){
-    el.innerHTML=`<div class="empty"><div class="empty-i">🎯</div><div class="empty-t">Нажми «Выбрать главные» — выбери до 3 задач на сегодня</div></div>`; return;
+    el.innerHTML=`<div class="empty"><div class="empty-i">🎯</div><div class="empty-t">Нажми «+ выбрать» — выбери до 3 задач на сегодня</div></div>`; return;
   }
   el.innerHTML = tasks.map((t,i)=>`
     <div class="act-task-item ${urgCls(t)}">
@@ -741,9 +741,8 @@ function renderTop3(el){
 }
 
 function renderTodayTasks(el){
-  // deadline tasks due today/overdue + top3
   const todayTasks = S.tasks.filter(t=>!t.done && t.bucket==='deadline' && t.deadline && dlDays(t.deadline)<=0);
-  const top3Active = S.top3.map(id=>S.tasks.find(t=>t.id===id&&!t.done)).filter(Boolean);
+  const top3Active = S.top3.map(id=>S.tasks.find(t=>t.id==id&&!t.done)).filter(Boolean);
   const combined = [...new Map([...todayTasks,...top3Active].map(t=>[t.id,t])).values()];
   if(!combined.length){ el.innerHTML=`<div class="empty"><div class="empty-t" style="font-size:13px">Нет задач на сегодня</div></div>`; return; }
   el.innerHTML = combined.map(t=>`
@@ -757,29 +756,63 @@ function renderTodayTasks(el){
 }
 
 function renderInWork(el){
-  // all non-done sorted tasks (deadline+next+waiting+projects)
-  const active = S.tasks.filter(t=>!t.done && ['deadline','next','waiting'].includes(t.bucket));
-  const projTasks = (S.projects||[]).flatMap(p=>p.subtasks.filter(s=>!s.done).map(s=>({...s,_proj:p.name,_projId:p.id})));
-  if(!active.length && !projTasks.length){ el.innerHTML=`<div class="empty"><div class="empty-t" style="font-size:13px">Нет активных задач</div></div>`; return; }
-  el.innerHTML = [
-    ...active.map(t=>{
-      const b=BUCKETS[t.bucket];
-      return `<div class="act-task-item ${urgCls(t)}">
+  let html = '';
+
+  // Горящие дедлайны
+  const deadlines = S.tasks.filter(t=>!t.done && t.bucket==='deadline')
+    .sort((a,b)=>{ if(!a.deadline) return 1; if(!b.deadline) return -1; return new Date(a.deadline)-new Date(b.deadline); });
+  if(deadlines.length){
+    html += `<div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🔴 С дедлайном</div>`;
+    html += deadlines.map(t=>`
+      <div class="act-task-item ${urgCls(t)}">
         <div class="tchk ${t.done?'on':''}" onclick="toggleTask('${t.id}');renderToday()"></div>
         <div class="tbody">
           <div class="ttxt ${t.done?'done':''}">${t.text}</div>
-          <div class="tmeta">${b?`<span class="tag ${b.cls}">${b.icon} ${b.name}</span>`:''} ${t.deadline?`<span class="dl-tag ${dlCls(t.deadline)}">${dlLabel(t.deadline)}</span>`:''}</div>
+          ${t.deadline?`<div class="tmeta"><span class="dl-tag ${dlCls(t.deadline)}">${dlLabel(t.deadline)}</span></div>`:''}
         </div>
+      </div>`).join('');
+  }
+
+  // В работе
+  const next = S.tasks.filter(t=>!t.done && t.bucket==='next');
+  if(next.length){
+    html += `<div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin:${deadlines.length?'14px':0} 0 8px">🔵 В работе</div>`;
+    html += next.map(t=>`
+      <div class="act-task-item">
+        <div class="tchk ${t.done?'on':''}" onclick="toggleTask('${t.id}');renderToday()"></div>
+        <div class="tbody"><div class="ttxt ${t.done?'done':''}">${t.text}</div></div>
+      </div>`).join('');
+  }
+
+  // Проекты
+  const projs = (S.projects||[]).filter(p=>p.subtasks.some(s=>!s.done));
+  if(projs.length){
+    html += `<div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px">📂 Проекты</div>`;
+    projs.forEach(p=>{
+      const activeSubs = p.subtasks.filter(s=>!s.done);
+      html += `<div style="margin-bottom:10px">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px">📂 ${p.name}</div>
+        ${activeSubs.map(s=>`<div class="act-task-item" style="padding-left:12px">
+          <div class="sub-chk ${s.done?'on':''}" onclick="toggleSub('${p.id}','${s.id}');renderToday()" style="flex-shrink:0;margin-top:2px"></div>
+          <div class="tbody"><div class="ttxt" style="font-size:14px;color:var(--t2)">${s.text}</div></div>
+        </div>`).join('')}
       </div>`;
-    }),
-    ...projTasks.map(s=>`<div class="act-task-item">
-      <div class="sub-chk ${s.done?'on':''}" onclick="toggleSub('${s._projId}','${s.id}');renderToday()" style="flex-shrink:0;margin-top:2px"></div>
-      <div class="tbody">
-        <div class="ttxt">${s.text}</div>
-        <div class="tmeta"><span class="tag tg-pr">📂 ${s._proj}</span></div>
-      </div>
-    </div>`)
-  ].join('');
+    });
+  }
+
+  // Ожидание
+  const waiting = S.tasks.filter(t=>!t.done && t.bucket==='waiting');
+  if(waiting.length){
+    html += `<div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px">🟣 Ожидание</div>`;
+    html += waiting.map(t=>`
+      <div class="act-task-item">
+        <div class="tchk ${t.done?'on':''}" onclick="toggleTask('${t.id}');renderToday()"></div>
+        <div class="tbody"><div class="ttxt ${t.done?'done':''}">${t.text}</div></div>
+      </div>`).join('');
+  }
+
+  if(!html){ el.innerHTML=`<div class="empty"><div class="empty-t" style="font-size:13px">Нет активных задач</div></div>`; return; }
+  el.innerHTML = html;
 }
 
 function renderToday(){
@@ -808,8 +841,8 @@ function openTop3Modal(){
   const el=document.getElementById('mo-top3-list');
   if(!available.length){ el.innerHTML=`<div class="empty"><div class="empty-t">Нет задач. Добавь через Сбор.</div></div>`; }
   else el.innerHTML=available.map(t=>{
-    const b=BUCKETS[t.bucket], sel=S.top3.includes(t.id);
-    return `<div class="t3si" onclick="toggleTop3Sel('${t.id}',this)">
+    const b=BUCKETS[t.bucket], sel=S.top3.some(i=>i==t.id);
+    return `<div class="t3si" onclick="toggleTop3Sel('${t.id}')">
       <div class="t3sc ${sel?'on':''}" id="t3s-${t.id}"></div>
       <div class="tbody"><div class="ttxt">${t.text}</div>${b?`<span class="tag ${b.cls}">${b.icon} ${b.name}</span>`:''}</div>
     </div>`;
@@ -817,7 +850,7 @@ function openTop3Modal(){
   openMo('mo-top3');
 }
 function toggleTop3Sel(id){
-  const idx=S.top3.indexOf(id);
+  const idx=S.top3.findIndex(i=>i==id);
   if(idx>=0){ S.top3.splice(idx,1); document.getElementById('t3s-'+id)?.classList.remove('on'); }
   else{ if(S.top3.length>=3){ showToast('Максимум 3 задачи!'); return; } S.top3.push(id); document.getElementById('t3s-'+id)?.classList.add('on'); }
   save();
@@ -899,7 +932,7 @@ document.getElementById('col-inp').addEventListener('keydown',e=>{ if(e.key==='E
 function toggleTask(id){
   const t=S.tasks.find(t=>t.id==id); if(!t) return;
   t.done=!t.done; save();
-  if(t.done) addXP(S.top3.includes(t.id)?15:10, S.top3.includes(t.id)?'главная задача':'задача выполнена');
+  if(t.done) addXP(S.top3.some(i=>i==t.id)?15:10, S.top3.some(i=>i==t.id)?'главная задача':'задача выполнена');
   checkAch(); updateStats();
 }
 function delTask(id){ S.tasks=S.tasks.filter(t=>t.id!=id); S.top3=S.top3.filter(i=>i!=id); save(); updateStats(); }
@@ -1129,7 +1162,7 @@ function showQuickSort(){
       <div class="ctitle" style="margin-bottom:8px">Куда отправить?</div>
       <div class="qs-strip">
         <button class="qs-btn qs-dl" onclick="qs('deadline')">🔴 Дедлайн</button>
-        <button class="qs-btn qs-nx" onclick="qs('next')">🔵 Следующее</button>
+        <button class="qs-btn qs-nx" onclick="qs('next')">🔵 В работе</button>
         <button class="qs-btn qs-wt" onclick="qs('waiting')">🟣 Ожидание</button>
         <button class="qs-btn qs-sd" onclick="qs('someday')">⚪ Когда-нибудь</button>
         <button class="qs-btn qs-pr" onclick="openNewProjectModal(true)">📂 Проект</button>
@@ -1249,7 +1282,7 @@ function showQ5(){
     <div class="qtxt2">Ты делаешь сам — или ждёшь кого-то?</div>
     <div class="qhint">«Ожидание» — ты уже передал задачу, мяч на стороне другого человека.</div>
     <div class="qopts">
-      <button class="qopt" onclick="assignAndNext('next')"><span class="qoi">🔵</span><div class="qob"><div class="qol">Я делаю сам</div><div class="qos">→ Следующие действия</div></div></button>
+      <button class="qopt" onclick="assignAndNext('next')"><span class="qoi">🔵</span><div class="qob"><div class="qol">Я делаю сам</div><div class="qos">→ В работе</div></div></button>
       <button class="qopt" onclick="assignAndNext('waiting')"><span class="qoi">🟣</span><div class="qob"><div class="qol">Жду другого</div><div class="qos">→ Ожидание</div></div></button>
     </div></div>`;
 }
